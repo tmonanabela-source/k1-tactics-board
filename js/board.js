@@ -426,6 +426,8 @@
     if (isTyping()) return;
     const mod = e.ctrlKey || e.metaKey;
     const k = e.key.toLowerCase();
+    // board shortcuts only apply on the board; other sections keep Escape for closing overlays
+    if (K1.UI && K1.UI.section && K1.UI.section !== 'board' && !S.presenting) { if (k === 'escape') K1.UI.closeOverlays(); return; }
     if (e.code === 'Space' && !mod) { if (S.presenting || K1.S.doc.frames.length > 1 && !S.selection.size && e.target === document.body) { e.preventDefault(); K1.Anim.toggle(); return; } spaceDown = true; svg.classList.add('panning'); e.preventDefault(); return; }
     if (mod && k === 'z') { e.preventDefault(); if (e.shiftKey) K1.redo(); else K1.undo(); return; }
     if (mod && k === 'y') { e.preventDefault(); K1.redo(); return; }

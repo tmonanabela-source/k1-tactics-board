@@ -314,6 +314,101 @@
     return '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(c.name) + '</title><style>body{font-family:Inter,Segoe UI,Arial,sans-serif;color:#111;margin:28px;max-width:960px}.head{display:flex;align-items:center;gap:16px;margin-bottom:10px}.head img,.head svg{width:72px;height:72px;border-radius:50%}h1{margin:0;font-size:26px}.meta{color:#555}h3{margin:22px 0 6px;font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:#333}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:6px 6px;border-bottom:1px solid #ddd;text-align:center}th.l,td.l{text-align:left}tr.ours td{background:#fff7d6}.fx td.t{width:64px;font-weight:700}.fx td.h{text-align:right;width:32%}.fx td.a{text-align:left;width:32%}.fx td.s{font-weight:800;width:70px;white-space:nowrap}.fx td.g{color:#777;font-size:11px;text-align:left}.fx tr.rh td{background:#131c21;color:#fff;text-align:left;font-weight:700;letter-spacing:.04em}small{color:#777}.champ{margin-top:18px;font-size:18px}.sc{columns:2}@media print{body{margin:12mm}}</style></head><body><div class="head">' + logo + '<div><h1>' + esc(c.name) + '</h1><div class="meta">' + esc([c.ageGroup, c.date, c.venue].filter(Boolean).join(' · ')) + ' · ' + esc((C.TYPES.find(t => t[0] === c.type) || [])[1] || c.type) + (c.endTime && c.matches.length ? ' · ' + esc(c.settings.startTime) + '–' + esc(c.endTime) : '') + '</div></div></div>' + body + '<p style="color:#999;font-size:12px;margin-top:28px">Hosted with the K1 Shooters Tactics Board</p><script>setTimeout(function(){window.print()},300)</script></body></html>';
   };
 
+  /* ------------------------------------------------------------ WhatsApp */
+  /** Standings only, formatted for WhatsApp: *bold* headings and a monospace table that keeps its columns. */
+  C.standingsText = function (c) {
+    const lines = ['*' + c.name.toUpperCase() + (c.ageGroup ? ' · ' + c.ageGroup : '') + '*'];
+    const meta = [c.date, c.venue].filter(Boolean).join(' · '); if (meta) lines.push(meta);
+    lines.push('');
+    const block = (rows, title) => {
+      lines.push('*' + title + '*');
+      lines.push('```');
+      lines.push(pad('#', 3) + pad('Team', 14) + ' P  W  D  L  GD Pts');
+      rows.forEach(r => lines.push(pad(r.pos, 3) + pad(r.name, 14) + ' ' + pad(r.p, 2) + ' ' + pad(r.w, 2) + ' ' + pad(r.d, 2) + ' ' + pad(r.l, 2) + ' ' + pad((r.gd > 0 ? '+' : '') + r.gd, 3) + ' ' + r.pts));
+      lines.push('```');
+    };
+    if (c.type === 'league') block(C.standings(c, null), 'Standings');
+    else if (c.type === 'groups') c.groups.forEach(g => block(C.standings(c, g.id), g.name));
+    const ko = c.matches.filter(m => m.played && !m.bye && m.stage !== 'league' && m.stage !== 'group');
+    if (ko.length) { lines.push('*Knockout*'); ko.forEach(m => lines.push('• ' + (C.STAGES[m.stage] || m.stage) + ': ' + C.teamName(c, m.homeId) + ' ' + m.homeScore + '–' + m.awayScore + ' ' + C.teamName(c, m.awayId) + (m.pensHome != null && m.pensAway != null ? ' (' + m.pensHome + '–' + m.pensAway + ' pens)' : ''))); lines.push(''); }
+    const ch = C.champion(c); if (ch) { lines.push('🏆 *Champions: ' + C.teamName(c, ch) + '*'); lines.push(''); }
+    const next = c.matches.filter(m => !m.played && !m.bye && m.homeId && m.awayId).slice(0, 4);
+    if (next.length) { lines.push('*Next up*'); next.forEach(m => lines.push('• ' + (m.time ? m.time + ' ' : '') + (m.pitch ? 'P' + m.pitch + ' · ' : '') + C.teamName(c, m.homeId) + ' v ' + C.teamName(c, m.awayId))); lines.push(''); }
+    lines.push('_Shared from the ' + (K1.settings.homeName || 'K1 Shooters') + ' app_');
+    return lines.join('\n');
+  };
+  /** Opens WhatsApp (app or web) with the text ready to send to any chat or group. */
+  C.whatsappURL = text => 'https://wa.me/?text=' + encodeURIComponent(text);
+  C.shareStandingsWhatsApp = function (c) {
+    const url = C.whatsappURL(C.standingsText(c));
+    const w = window.open(url, '_blank', 'noopener');
+    if (!w) { navigator.clipboard && navigator.clipboard.writeText(C.standingsText(c)); K1.UI && K1.UI.toast('Pop-up blocked — the standings were copied instead. Paste them into WhatsApp.', 'warn', 4000); }
+  };
+
+  /** Standings as an image (PNG) with the crest — for the parents' group. */
+  C.standingsSVG = function (c) {
+    const W = 1200, rowH = 46, headH = 150, titleH = 56, gap = 28, footH = 64;
+    const tables = c.type === 'league' ? [['Standings', C.standings(c, null)]] : c.type === 'groups' ? c.groups.map(g => [g.name, C.standings(c, g.id)]) : [];
+    const ko = c.type === 'knockout' || C.hasKnockout(c) ? c.matches.filter(m => m.played && !m.bye && m.stage !== 'group' && m.stage !== 'league') : [];
+    let H = headH; tables.forEach(t => { H += titleH + rowH * (t[1].length + 1) + gap; }); if (ko.length) H += titleH + rowH * ko.length + gap; H += footH;
+    const f = 'font-family="Inter, Segoe UI, Arial, sans-serif"';
+    const cols = { pos: 48, team: 96, p: 690, w: 750, d: 810, l: 870, gf: 935, ga: 1000, gd: 1065, pts: 1140 };
+    let s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+    s += '<rect width="' + W + '" height="' + H + '" fill="#0b1116"/><rect width="' + W + '" height="' + headH + '" fill="#121a22"/>';
+    const logo = K1.brandLogo ? K1.brandLogo() : null;
+    if (logo) s += '<image href="' + logo + '" x="40" y="30" width="90" height="90" preserveAspectRatio="xMidYMid meet"/>';
+    s += '<text x="152" y="72" ' + f + ' font-size="42" font-weight="800" fill="#ffffff">' + esc(c.name) + '</text>';
+    s += '<text x="152" y="108" ' + f + ' font-size="20" font-weight="600" fill="#f5b301">' + esc([c.ageGroup, c.date, c.venue].filter(Boolean).join(' · ')) + '</text>';
+    s += '<text x="' + (W - 40) + '" y="72" ' + f + ' font-size="18" font-weight="800" fill="#8b98a5" text-anchor="end" letter-spacing="2">' + esc((K1.settings.homeName || 'K1 SHOOTERS').toUpperCase()) + '</text>';
+    s += '<text x="' + (W - 40) + '" y="102" ' + f + ' font-size="16" font-weight="600" fill="#8b98a5" text-anchor="end">' + esc((C.TYPES.find(t => t[0] === c.type) || [])[1] || '') + '</text>';
+    let y = headH;
+    tables.forEach(([title, rows]) => {
+      s += '<text x="48" y="' + (y + 36) + '" ' + f + ' font-size="22" font-weight="800" fill="#f5b301" letter-spacing="2">' + esc(title.toUpperCase()) + '</text>';
+      y += titleH;
+      const hdr = [['#', cols.pos, 'start'], ['TEAM', cols.team, 'start'], ['P', cols.p, 'middle'], ['W', cols.w, 'middle'], ['D', cols.d, 'middle'], ['L', cols.l, 'middle'], ['GF', cols.gf, 'middle'], ['GA', cols.ga, 'middle'], ['GD', cols.gd, 'middle'], ['PTS', cols.pts, 'middle']];
+      hdr.forEach(h => { s += '<text x="' + h[1] + '" y="' + (y + 30) + '" ' + f + ' font-size="15" font-weight="800" fill="#8b98a5" text-anchor="' + h[2] + '" letter-spacing="1">' + h[0] + '</text>'; });
+      y += rowH;
+      rows.forEach((r, i) => {
+        const ours = C.isOurs(c, r.teamId); const adv = c.type === 'groups' && r.pos <= (Number(c.settings.advancePerGroup) || 0);
+        const fill = ours ? 'rgba(245,179,1,.16)' : adv ? 'rgba(34,197,94,.10)' : (i % 2 ? 'rgba(255,255,255,.03)' : 'none');
+        if (fill !== 'none') s += '<rect x="32" y="' + y + '" width="' + (W - 64) + '" height="' + rowH + '" rx="8" fill="' + fill + '"/>';
+        const t = C.team(c, r.teamId);
+        s += '<text x="' + cols.pos + '" y="' + (y + 31) + '" ' + f + ' font-size="20" font-weight="800" fill="#ffffff">' + r.pos + '</text>';
+        s += '<circle cx="' + (cols.team + 8) + '" cy="' + (y + 23) + '" r="7" fill="' + (t ? t.color : '#64748b') + '"/>';
+        s += '<text x="' + (cols.team + 24) + '" y="' + (y + 31) + '" ' + f + ' font-size="21" font-weight="700" fill="#ffffff">' + esc(r.name) + '</text>';
+        [[r.p, cols.p], [r.w, cols.w], [r.d, cols.d], [r.l, cols.l], [r.gf, cols.gf], [r.ga, cols.ga], [(r.gd > 0 ? '+' : '') + r.gd, cols.gd]].forEach(v => { s += '<text x="' + v[1] + '" y="' + (y + 31) + '" ' + f + ' font-size="20" font-weight="600" fill="#e8eef4" text-anchor="middle">' + v[0] + '</text>'; });
+        s += '<text x="' + cols.pts + '" y="' + (y + 31) + '" ' + f + ' font-size="22" font-weight="900" fill="#f5b301" text-anchor="middle">' + r.pts + '</text>';
+        y += rowH;
+      });
+      y += gap;
+    });
+    if (ko.length) {
+      s += '<text x="48" y="' + (y + 36) + '" ' + f + ' font-size="22" font-weight="800" fill="#f5b301" letter-spacing="2">KNOCKOUT</text>'; y += titleH;
+      ko.forEach((m, i) => {
+        if (i % 2 === 0) s += '<rect x="32" y="' + y + '" width="' + (W - 64) + '" height="' + rowH + '" rx="8" fill="rgba(255,255,255,.03)"/>';
+        s += '<text x="48" y="' + (y + 31) + '" ' + f + ' font-size="16" font-weight="800" fill="#8b98a5">' + esc(C.STAGES[m.stage] || m.stage) + '</text>';
+        s += '<text x="560" y="' + (y + 31) + '" ' + f + ' font-size="21" font-weight="700" fill="#ffffff" text-anchor="end">' + esc(C.teamName(c, m.homeId)) + '</text>';
+        s += '<text x="620" y="' + (y + 31) + '" ' + f + ' font-size="22" font-weight="900" fill="#f5b301" text-anchor="middle">' + m.homeScore + ' – ' + m.awayScore + '</text>';
+        s += '<text x="680" y="' + (y + 31) + '" ' + f + ' font-size="21" font-weight="700" fill="#ffffff">' + esc(C.teamName(c, m.awayId)) + (m.pensHome != null && m.pensAway != null ? ' <tspan font-size="15" fill="#8b98a5">(' + m.pensHome + '–' + m.pensAway + ' pens)</tspan>' : '') + '</text>';
+        y += rowH;
+      });
+      y += gap;
+    }
+    const ch = C.champion(c);
+    s += '<text x="48" y="' + (H - 26) + '" ' + f + ' font-size="16" fill="#8b98a5">' + (ch ? '🏆 Champions: ' + esc(C.teamName(c, ch)) + '   ·   ' : '') + 'Shared from the ' + esc(K1.settings.homeName || 'K1 Shooters') + ' app · ' + esc(new Date().toLocaleDateString()) + '</text>';
+    s += '</svg>';
+    return { svg: s, width: W, height: H };
+  };
+  C.exportStandingsImage = async function (c) {
+    try {
+      const { svg, width, height } = C.standingsSVG(c);
+      const canvas = await K1.Store.svgToCanvas(svg, width, height);
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      const name = K1.Store.safeName(c.name) + '-standings.png';
+      if (K1.UI) K1.UI.imagePreview(canvas.toDataURL('image/png'), name, blob); else await K1.Store.shareOrDownload(blob, name, c.name);
+    } catch (e) { K1.UI && K1.UI.toast('Could not build the image: ' + e.message, 'warn'); }
+  };
+
   /* ------------------------------------------------- match centre bridge */
   /** Run a fixture live in the Match centre; the result writes back when the match is finished. */
   C.startLive = function (id, mid) {

@@ -60,22 +60,32 @@
   ];
   UI.TRAY = TRAY;
 
+  // side panel of the Board section — board things only
   const TABS = [
-    { id: 'board', icon: 'grid', label: 'Pitch' },
-    { id: 'team', icon: 'users', label: 'Teams' },
+    { id: 'board', icon: 'layers', label: 'Pitch' },
     { id: 'playbook', icon: 'book', label: 'Playbook' },
     { id: 'frames', icon: 'film', label: 'Animate' },
-    { id: 'match', icon: 'whistle', label: 'Match' },
-    { id: 'sessions', icon: 'calendar', label: 'Sessions' },
-    { id: 'comps', icon: 'trophy', label: 'Comps' },
-    { id: 'library', icon: 'folder', label: 'Library' },
   ];
+  // app sections — the club app around the board
+  const SECTIONS = [
+    { id: 'home', icon: 'home', label: 'Home', title: 'K1 Shooters' },
+    { id: 'board', icon: 'grid', label: 'Board', title: 'Tactics board' },
+    { id: 'teams', icon: 'users', label: 'Teams', title: 'Teams & players' },
+    { id: 'comps', icon: 'trophy', label: 'Comps', title: 'Competitions' },
+    { id: 'match', icon: 'whistle', label: 'Match', title: 'Match day' },
+    { id: 'sessions', icon: 'calendar', label: 'Sessions', title: 'Training sessions' },
+    { id: 'library', icon: 'folder', label: 'Library', title: 'Board library' },
+  ];
+  const WS_PANE = { home: 'home', teams: 'team', comps: 'comps', match: 'match', sessions: 'sessions', library: 'library' };
+  UI.SECTIONS = SECTIONS;
+  UI.section = 'home';
 
   /* ==================================================================== init */
   UI.init = function () {
     applyTheme();
-    buildBrand(); buildTopbar(); buildToolrail(); buildTray(); buildTabs(); buildMobileBar(); buildHUD();
+    buildBrand(); buildTopbar(); buildToolrail(); buildTray(); buildTabs(); buildMobileBar(); buildHUD(); buildAppNav();
     bindTitle();
+    document.body.dataset.section = UI.section;
     renderTab(activeTab);
     renderFrames();
     renderSelbar();
@@ -122,8 +132,46 @@
   function refreshPaneIf(names) {
     if (names.includes(activeTab) && !K1.isMobile()) renderTab(activeTab);
     if (sheetPane && names.includes(sheetPane)) renderSheetPane();
+    const wsPane = WS_PANE[UI.section];
+    if (UI.section !== 'board' && (names.includes(wsPane) || UI.section === 'home')) renderWorkspace();
   }
-  UI.refreshPane = () => { renderTab(activeTab); if (sheetPane) renderSheetPane(); };
+  UI.refreshPane = () => { renderTab(activeTab); if (sheetPane) renderSheetPane(); if (UI.section !== 'board') renderWorkspace(); };
+
+  /* ================================================================ sections */
+  function buildAppNav() {
+    const nav = $('#appnav'); if (!nav) return;
+    nav.innerHTML = SECTIONS.map(s => '<button class="nav-item' + (s.id === UI.section ? ' on' : '') + '" data-section="' + s.id + '" title="' + esc(s.title) + '">' + icon(s.icon, { size: 22 }) + '<span>' + esc(s.label) + '</span></button>').join('') +
+      '<span class="nav-gap"></span><button class="nav-item" data-section="settings" title="Settings">' + icon('settings', { size: 20 }) + '<span>Settings</span></button>';
+    $$('[data-section]', nav).forEach(b => { b.onclick = () => { if (b.dataset.section === 'settings') UI.showSettings(); else UI.goSection(b.dataset.section); }; });
+  }
+  /** Switch the app to a section: the board keeps its own layout, everything else renders in the workspace. */
+  UI.goSection = function (id) {
+    if (!SECTIONS.find(s => s.id === id)) id = 'home';
+    const prev = UI.section;
+    UI.section = id;
+    document.body.dataset.section = id;
+    $$('#appnav .nav-item').forEach(b => b.classList.toggle('on', b.dataset.section === id));
+    const inMore = !['home', 'board', 'teams', 'comps'].includes(id);
+    $$('#mobilebar .mb-item').forEach(b => b.classList.toggle('on', b.dataset.mb === id || (inMore && b.dataset.mb === 'more')));
+    const st = $('#sectionTitle'); if (st) { const sec = SECTIONS.find(s => s.id === id); st.textContent = id === 'board' ? '' : (sec ? sec.title : ''); }
+    if (UI.isSheetOpen() && sheetPane !== 'tray') UI.closeSheet();
+    closePopovers(); UI.hideContext();
+    if (id === 'board') { setTimeout(() => K1.Render.layout(true), 30); setTimeout(() => K1.Render.layout(true), 300); }
+    else renderWorkspace();
+    if (prev !== id) K1.emit('section', id);
+    try { sessionStorage.setItem('k1tb:section', id); } catch (e) { /* ignore */ }
+    const ws = $('#workspace'); if (ws && prev !== id) ws.scrollTop = 0;
+  };
+  function renderWorkspace() {
+    const el = $('#wsInner'); if (!el || UI.section === 'board') return;
+    const pane = WS_PANE[UI.section];
+    const fn = K1.Panes && K1.Panes[pane];
+    el.dataset.pane = pane;
+    const ws = $('#workspace'); const st = ws ? ws.scrollTop : 0;
+    if (fn) fn(el); else el.innerHTML = '';
+    if (ws) ws.scrollTop = st;
+  }
+  UI.renderWorkspace = renderWorkspace;
 
   /* ================================================================== theme */
   function applyTheme() {
@@ -137,22 +185,22 @@
   function buildBrand() {
     const b = $('#brand');
     b.innerHTML = '<div class="brand-badge">' + K1.logoHTML(38) + '</div><div class="brand-text"><b>K1 SHOOTERS</b><span>Tactics Board</span></div>';
-    b.onclick = () => UI.newBoardDialog();
-    b.title = 'New board';
+    b.onclick = () => UI.goSection('home');
+    b.title = 'Home';
   }
 
   /* ================================================================= topbar */
   function buildTopbar() {
     const a = $('#topActions');
     a.innerHTML = [
-      '<button class="icon-btn" id="btnUndo" title="Undo (Ctrl+Z)">' + icon('undo') + '</button>',
-      '<button class="icon-btn hide-sm" id="btnRedo" title="Redo (Ctrl+Y)">' + icon('redo') + '</button>',
-      '<span class="sep"></span>',
-      '<button class="btn btn-ghost hide-sm" id="btnNew" title="New board">' + icon('plus') + '<span>New</span></button>',
-      '<button class="btn btn-ghost" id="btnSave" title="Save to library (Ctrl+S)">' + icon('save') + '<span class="hide-sm">Save</span><i class="dirty-dot" hidden></i></button>',
-      '<button class="btn btn-ghost" id="btnExport" title="Export image / video / file" data-popover="export">' + icon('download') + '<span class="hide-sm">Export</span></button>',
-      '<button class="btn btn-ghost hide-sm" id="btnShare" title="Share">' + icon('share') + '<span>Share</span></button>',
-      '<button class="btn btn-primary" id="btnPresent" title="Present (F)">' + icon('fullscreen') + '<span class="hide-sm">Present</span></button>',
+      '<button class="icon-btn board-only" id="btnUndo" title="Undo (Ctrl+Z)">' + icon('undo') + '</button>',
+      '<button class="icon-btn hide-sm board-only" id="btnRedo" title="Redo (Ctrl+Y)">' + icon('redo') + '</button>',
+      '<span class="sep board-only"></span>',
+      '<button class="btn btn-ghost hide-sm board-only" id="btnNew" title="New board">' + icon('plus') + '<span>New</span></button>',
+      '<button class="btn btn-ghost board-only" id="btnSave" title="Save to library (Ctrl+S)">' + icon('save') + '<span class="hide-sm">Save</span><i class="dirty-dot" hidden></i></button>',
+      '<button class="btn btn-ghost board-only" id="btnExport" title="Export image / video / file" data-popover="export">' + icon('download') + '<span class="hide-sm">Export</span></button>',
+      '<button class="btn btn-ghost hide-sm board-only" id="btnShare" title="Share">' + icon('share') + '<span>Share</span></button>',
+      '<button class="btn btn-primary board-only" id="btnPresent" title="Present (F)">' + icon('fullscreen') + '<span class="hide-sm">Present</span></button>',
       '<button class="icon-btn" id="btnMore" title="Settings & help" data-popover="more">' + icon('more') + '</button>',
     ].join('');
     $('#btnUndo').onclick = () => K1.undo();
@@ -195,7 +243,8 @@
   function buildToolrail() { renderToolrail(); }
   function renderToolrail() {
     const rail = $('#toolrail');
-    let s = '<div class="rail-tools">';
+    let s = '<div class="rail-panes"><button class="tool pane-btn" data-pane="board" title="Pitch & display">' + icon('layers', { size: 20 }) + '</button><button class="tool pane-btn" data-pane="tray" title="Add players & equipment">' + icon('plus', { size: 22 }) + '</button><button class="tool pane-btn" data-pane="playbook" title="Playbook">' + icon('book', { size: 20 }) + '</button><button class="tool pane-btn" data-pane="frames" title="Animate">' + icon('film', { size: 20 }) + '</button></div>';
+    s += '<div class="rail-tools">';
     TOOLS.forEach(t => {
       if (t.sep) { s += '<span class="rail-sep"></span>'; return; }
       s += '<button class="tool' + (S.tool === t.id && !S.stamp ? ' active' : '') + '" data-tool="' + t.id + '" title="' + esc(t.label) + (t.key ? ' (' + t.key + ')' : '') + '" aria-label="' + esc(t.label) + '">' + icon(t.icon, { size: 22 }) + '</button>';
@@ -205,6 +254,7 @@
     s += '<button class="tool width-btn" data-popover="width" title="Line thickness" aria-label="Line thickness"><span class="width-preview" style="height:' + Math.round(S.style.width * 8) + 'px"></span></button>';
     s += '</div>';
     rail.innerHTML = s;
+    $$('[data-pane]', rail).forEach(b => { b.onclick = () => UI.openPane(b.dataset.pane); });
     $$('[data-tool]', rail).forEach(b => { b.onclick = () => { K1.Board.setStamp(null); K1.setTool(b.dataset.tool); }; });
     $('.swatch-btn', rail).onclick = e => colorPopover(e.currentTarget, S.style.color, c => { S.style.color = c; renderToolrail(); const sel = K1.selected().filter(o => o.type !== 'player' && o.type !== 'ball' || o.type === 'player' && o.team === 'neutral'); if (sel.length) K1.updateObjects(sel.map(o => o.id), { color: c }); });
     $('.width-btn', rail).onclick = e => UI.popover(e.currentTarget, [
@@ -474,25 +524,31 @@
     pane.dataset.pane = id;
     if (fn) fn(pane); else pane.innerHTML = '<div class="empty">Coming soon</div>';
   }
-  /** Open a pane: side panel on desktop, bottom sheet on phone. */
+  /** Open something by name: app sections switch screens; board panes open in the side panel (desktop) or a sheet (phone). */
   UI.openPane = function (id) {
-    if (id === 'more') { return UI.sheet('More', body => { body.innerHTML = '<div class="more-grid">' + [['team', 'users', 'Teams'], ['comps', 'trophy', 'Tournaments'], ['sessions', 'calendar', 'Sessions'], ['library', 'folder', 'Library'], ['settings', 'settings', 'Settings'], ['help', 'help', 'Help'], ['install', 'smartphone', 'Install app'], ['share', 'share', 'Share'], ['import', 'upload', 'Import'], ['backup', 'download', 'Back up']].map(x => '<button class="more-item" data-more="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('') + '</div>'; $$('[data-more]', body).forEach(b => { b.onclick = () => { const m = b.dataset.more; UI.closeSheet(); if (m === 'settings') UI.showSettings(); else if (m === 'help') UI.showHelp(); else if (m === 'install') UI.installApp(); else if (m === 'share') UI.shareDialog(); else if (m === 'import') UI.importFile(); else if (m === 'backup') K1.Store.exportAll(); else UI.openPane(m); }; }); }, 'more'); }
+    if (id === 'team') id = 'teams';
+    if (WS_PANE[id]) return UI.goSection(id);
+    if (id === 'more') { return UI.sheet('More', body => { body.innerHTML = '<div class="more-grid">' + [['match', 'whistle', 'Match day'], ['sessions', 'calendar', 'Sessions'], ['library', 'folder', 'Library'], ['settings', 'settings', 'Settings'], ['help', 'help', 'Help'], ['install', 'smartphone', 'Install app'], ['share', 'share', 'Share board'], ['import', 'upload', 'Import'], ['backup', 'download', 'Back up']].map(x => '<button class="more-item" data-more="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('') + '</div>'; $$('[data-more]', body).forEach(b => { b.onclick = () => { const m = b.dataset.more; UI.closeSheet(); if (m === 'settings') UI.showSettings(); else if (m === 'help') UI.showHelp(); else if (m === 'install') UI.installApp(); else if (m === 'share') { UI.goSection('board'); UI.shareDialog(); } else if (m === 'import') UI.importFile(); else if (m === 'backup') K1.Store.exportAll(); else UI.openPane(m); }; }); }, 'more'); }
+    if (UI.section !== 'board') UI.goSection('board');
     if (id === 'tray') { return UI.sheet('Add to the pitch', body => { body.innerHTML = '<div class="tray-sheet">' + trayHTML() + '</div><p class="hint">Tap an item, then tap the pitch to place it (players number themselves). Tap again to place more. Drag from here also works.</p>'; bindTray(body); }, 'tray'); }
-    if (K1.isMobile()) { UI.sheet(TABS.find(t => t.id === id) ? TABS.find(t => t.id === id).label : id, body => { const fn = K1.Panes && K1.Panes[id]; body.dataset.pane = id; if (fn) fn(body); }, id); }
+    if (!TABS.find(t => t.id === id)) id = 'board';
+    if (K1.isMobile()) { UI.sheet(TABS.find(t => t.id === id).label, body => { const fn = K1.Panes && K1.Panes[id]; body.dataset.pane = id; if (fn) fn(body); }, id); }
     else UI.showTab(id);
   };
 
   /* ============================================================= mobile bar */
   function buildMobileBar() {
     const mb = $('#mobilebar');
-    const items = [['board', 'grid', 'Pitch'], ['tray', 'plus', 'Add'], ['playbook', 'book', 'Playbook'], ['frames', 'film', 'Animate'], ['match', 'whistle', 'Match'], ['more', 'menu', 'More']];
+    const items = [['home', 'home', 'Home'], ['board', 'grid', 'Board'], ['teams', 'users', 'Teams'], ['comps', 'trophy', 'Comps'], ['more', 'menu', 'More']];
     mb.innerHTML = items.map(x => '<button class="mb-item" data-mb="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('');
     $$('[data-mb]', mb).forEach(b => { b.onclick = () => UI.openPane(b.dataset.mb); });
   }
 
   /* ================================================================= sheet */
+  let sheetCloseTimer = null;
   UI.sheet = function (title, render, paneId) {
     const sh = $('#sheet');
+    if (sheetCloseTimer) { clearTimeout(sheetCloseTimer); sheetCloseTimer = null; }
     sheetPane = paneId || null;
     $('#sheetTitle').textContent = title;
     const body = $('#sheetBody'); body.innerHTML = ''; body.scrollTop = 0;
@@ -510,7 +566,7 @@
     handle.onpointerup = () => { sy = null; };
   };
   function renderSheetPane() { const sh = $('#sheet'); if (sh && !sh.hidden && sh._render) { const body = $('#sheetBody'); const st = body.scrollTop; body.innerHTML = ''; sh._render(body); body.scrollTop = st; } }
-  UI.closeSheet = function () { const sh = $('#sheet'); sh.classList.remove('open'); sheetPane = null; setTimeout(() => { sh.hidden = true; }, 180); };
+  UI.closeSheet = function () { const sh = $('#sheet'); sh.classList.remove('open'); sheetPane = null; if (sheetCloseTimer) clearTimeout(sheetCloseTimer); sheetCloseTimer = setTimeout(() => { sh.hidden = true; sheetCloseTimer = null; }, 180); };
   UI.isSheetOpen = () => !$('#sheet').hidden;
 
   /* ================================================================= modal */
@@ -772,6 +828,7 @@
       else { doc = K1.Templates.docFromFormations($('#nbHome', m.body).value, start === 'both' ? $('#nbAway', m.body).value : null, pitch); if (title) doc.title = title; else if (team) doc.title = team.name + ' · ' + doc.title; }
       if (team) { doc.teamId = team.id; doc.teams.home = { name: K1.Teams.displayName(team), kit: team.kit }; }
       K1.loadDoc(doc);
+      UI.goSection('board');
       UI.toast('New board created');
     } }] });
     const nbs = $('#nbSave', m.body); if (nbs) nbs.onclick = () => { K1.Store.saveCurrent(); nbs.parentElement.remove(); };
@@ -790,7 +847,7 @@
       '<button class="wcard" data-w="morph"><b>Watch a tactic morph</b><span>Barcelona 4-3-3 → 2-3-5, animated</span></button>' +
       '<button class="wcard" data-w="setpiece"><b>Open a set piece</b><span>Attacking corner: near-post overload</span></button>' +
       '<button class="wcard" data-w="blank"><b>Empty pitch</b><span>Draw your own idea from scratch</span></button>' +
-      '</div><p class="hint">Tip: double-tap a player to edit the number and name · press <kbd>?</kbd> for shortcuts.</p></div>';
+      '</div><p class="hint">Home shows your teams, next fixtures and live match. Teams holds player profiles with photos; Comps hosts leagues and tournaments. Press <kbd>?</kbd> on the board for shortcuts.</p></div>';
     const m = UI.modal({ title: 'K1 Shooters · Tactics Board', body, wide: true, cls: 'welcome-modal', onClose: () => K1.saveSettings({ tipsSeen: true }) });
     $$('[data-w]', m.body).forEach(b => { b.onclick = () => {
       const w = b.dataset.w;
@@ -798,6 +855,7 @@
       else if (w === 'morph') { K1.loadDoc(K1.Templates.docFromMorph(K1.MORPHS.find(x => x.id === 'barca_433_235'))); setTimeout(() => K1.Anim.play(), 400); }
       else if (w === 'setpiece') K1.loadDoc(K1.Templates.docFromSetPiece(K1.SETPIECES[0]));
       else K1.loadDoc(K1.newDoc({ title: 'Untitled board' }));
+      UI.goSection('board');
       m.close();
     }; });
   };

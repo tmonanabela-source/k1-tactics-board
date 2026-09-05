@@ -15,10 +15,10 @@
     K1.on('settings', () => K1.Render.refreshPhotos());
 
     // 1) shared link → 2) autosaved working copy → 3) a proper first board
-    let loaded = false;
+    let loaded = false, openBoard = false;
     try {
       const shared = await K1.Store.loadFromHash();
-      if (shared) { K1.loadDoc(shared, { dirty: true }); K1.UI.toast('Opened a shared board', 'ok'); loaded = true; }
+      if (shared) { K1.loadDoc(shared, { dirty: true }); K1.UI.toast('Opened a shared board', 'ok'); loaded = true; openBoard = true; }
     } catch (e) { console.error(e); }
     if (!loaded) {
       const cur = K1.Store.restoreCurrent();
@@ -37,9 +37,15 @@
       K1.S.dirty = false;
     }
 
+    // land on Home (the club app), or straight on the board for a shared link / the "new board" shortcut
+    let section = 'home';
+    try { const remembered = sessionStorage.getItem('k1tb:section'); if (remembered) section = remembered; } catch (e) { /* ignore */ }
+    if (openBoard || /[?&]new=1/.test(location.search)) section = 'board';
+    K1.UI.goSection(section);
+
     window.addEventListener('hashchange', async () => {
       const shared = await K1.Store.loadFromHash();
-      if (shared) { K1.loadDoc(shared, { dirty: true }); K1.UI.toast('Opened a shared board', 'ok'); }
+      if (shared) { K1.loadDoc(shared, { dirty: true }); K1.UI.goSection('board'); K1.UI.toast('Opened a shared board', 'ok'); }
     });
 
     // PWA: service worker + install prompt

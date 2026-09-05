@@ -63,7 +63,7 @@
     s += '<div class="comp-head"><div><b class="comp-name">' + esc(c.name) + '</b><div class="muted small">' + esc(typeLabel(c.type)) + ' · ' + c.teams.length + ' teams' + (c.ageGroup ? ' · ' + esc(c.ageGroup) : '') + (c.date ? ' · ' + esc(c.date) : '') + (c.venue ? ' · ' + esc(c.venue) : '') + (c.matches.length ? ' · ' + esc(c.settings.startTime) + '–' + esc(c.endTime || '') : '') + '</div></div>' + statusPill(c) + '</div>';
     if (ch) s += '<div class="champ-banner">' + icon('trophy', { size: 18 }) + '<span>Champions: <b>' + esc(C().teamName(c, ch)) + '</b></span></div>';
     s += '<div class="subtabs">' + tabs.map(t => '<button class="' + (sub === t[0] ? 'on' : '') + '" data-sub="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>';
-    s += '<div class="row wrap comp-actions"><button class="btn btn-sm" data-act="share">' + icon('share', { size: 15 }) + '<span>Share text</span></button><button class="btn btn-sm" data-act="print">' + icon('print', { size: 15 }) + '<span>Print</span></button><button class="btn btn-sm" data-act="json">' + icon('download', { size: 15 }) + '<span>Export</span></button></div>';
+    s += '<div class="row wrap comp-actions"><button class="btn btn-sm btn-primary" data-act="wa" title="Open WhatsApp with the standings ready to send">' + icon('share', { size: 15 }) + '<span>WhatsApp standings</span></button><button class="btn btn-sm" data-act="img" title="Standings as a picture with the crest">' + icon('image', { size: 15 }) + '<span>Standings image</span></button><button class="btn btn-sm" data-act="share">' + icon('clipboard', { size: 15 }) + '<span>Full update</span></button><button class="btn btn-sm" data-act="print">' + icon('print', { size: 15 }) + '<span>Print</span></button><button class="btn btn-sm btn-ghost" data-act="json">' + icon('download', { size: 15 }) + '<span>Export</span></button></div>';
     if (sub === 'fixtures') s += fixturesHTML(c);
     else if (sub === 'table') s += tableHTML(c);
     else if (sub === 'bracket') s += bracketHTML(c);
@@ -117,6 +117,7 @@
     if (c.type === 'league') s += standingsTable(c, C().standings(c, null), 'Standings', 0);
     else c.groups.forEach(g => { s += standingsTable(c, C().standings(c, g.id), g.name, Number(c.settings.advancePerGroup) || 0); });
     s += '<p class="hint">Sorted by points, goal difference, goals scored, then head-to-head. Highlighted rows advance.</p>';
+    s += '<div class="row wrap"><button class="btn btn-sm btn-primary" data-act="wa">' + icon('share', { size: 15 }) + '<span>Send to WhatsApp</span></button><button class="btn btn-sm" data-act="img">' + icon('image', { size: 15 }) + '<span>Standings image</span></button></div>';
     return section('Table', s);
   }
 
@@ -177,6 +178,8 @@
     $$('[data-sub]', root).forEach(b => { b.onclick = () => { sub = b.dataset.sub; P.comps(root); }; });
     $$('.comp-actions [data-act], .pane-section [data-act]', root).forEach(b => { b.onclick = async () => {
       const a = b.dataset.act;
+      if (a === 'wa') { C().shareStandingsWhatsApp(c); return; }
+      if (a === 'img') { C().exportStandingsImage(c); return; }
       if (a === 'share') { const txt = C().shareText(c); if (navigator.share) { try { await navigator.share({ title: c.name, text: txt }); return; } catch (e) { /* cancelled */ } } try { await navigator.clipboard.writeText(txt); UI().toast('Copied — paste it into WhatsApp', 'ok'); } catch (e) { UI().modal({ title: c.name, body: '<textarea class="input mono" rows="14" readonly>' + esc(txt) + '</textarea>' }); } }
       else if (a === 'print') { const w = window.open('', '_blank'); if (!w) { UI().toast('Allow pop-ups to print.', 'warn'); return; } w.document.write(C().printHTML(c)); w.document.close(); }
       else if (a === 'json') K1.Store.shareOrDownload(new Blob([JSON.stringify({ app: 'k1-tactics-board', v: 2, competition: c }, null, 1)], { type: 'application/json' }), K1.Store.safeName(c.name) + '.k1comp.json', c.name);

@@ -23,9 +23,13 @@
     <header class="topbar" id="topbar">
       <button class="icon-btn only-mobile" id="btnMenu" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       <div class="brand" id="brand"></div>
-      <div class="title-wrap"><input id="boardTitle" class="title-input" spellcheck="false" aria-label="Board title" value="Untitled board"></div>
+      <div class="title-wrap board-only"><input id="boardTitle" class="title-input" spellcheck="false" aria-label="Board title" value="Untitled board"></div>
+      <div class="section-title" id="sectionTitle"></div>
       <div class="topbar-actions" id="topActions"></div>
     </header>
+
+    <nav class="appnav" id="appnav" aria-label="Sections"></nav>
+    <section class="workspace" id="workspace"><div class="ws-inner" id="wsInner"></div></section>
 
     <aside class="toolrail" id="toolrail" aria-label="Tools"></aside>
 
@@ -91,6 +95,7 @@
   <script src="js/panes-teams.js"></script>
   <script src="js/competitions.js"></script>
   <script src="js/panes-comps.js"></script>
+  <script src="js/panes-home.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

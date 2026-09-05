@@ -25,6 +25,7 @@
     }
     K1.loadDoc(doc, { dirty: true });
     if (K1.isMobile() && UI().isSheetOpen()) UI().closeSheet();
+    if (UI().goSection) UI().goSection('board');
     UI().toast('Opened ' + (label || doc.title));
     return true;
   }
