@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>K1 icon rasteriser</title>
+<style>body{font-family:system-ui,sans-serif;background:#0b1116;color:#e8eef4;padding:24px}a{display:inline-block;margin:8px 12px 8px 0;color:#f5b301}canvas{display:block;margin:6px 0;background:#fff}</style>
+</head>
+<body>
+<h2>K1 Tactics Board — PNG icons</h2>
+<p>Open this file in a browser (via <code>node serve.js</code> → <code>/tools/make-png-icons.html</code>). Click each link to download, then drop the files into <code>assets/</code>.</p>
+<div id="out"></div>
+<script src="../js/logo-data.js"></script>
+<script src="../js/logo.js"></script>
+<script>
+(async function () {
+  const NAVY = '#131c21';
+  // Prefer the real bundled crest (PNG); fall back to the drawn SVG crest.
+  const badgeInner = K1.BUNDLED_LOGO
+    ? '<image href="' + K1.BUNDLED_LOGO + '" x="0" y="0" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>'
+    : K1.LOGO.badge({ size: 512 }).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+  const svgs = {
+    'icon-192.png': [192, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" rx="96" fill="' + NAVY + '"/><svg x="36" y="36" width="440" height="440" viewBox="0 0 512 512">' + badgeInner + '</svg></svg>'],
+    'icon-512.png': [512, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" rx="96" fill="' + NAVY + '"/><svg x="36" y="36" width="440" height="440" viewBox="0 0 512 512">' + badgeInner + '</svg></svg>'],
+    'icon-maskable-512.png': [512, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" fill="' + NAVY + '"/><svg x="76" y="76" width="360" height="360" viewBox="0 0 512 512">' + badgeInner + '</svg></svg>'],
+    'apple-touch-icon.png': [180, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" fill="' + NAVY + '"/><svg x="40" y="40" width="432" height="432" viewBox="0 0 512 512">' + badgeInner + '</svg></svg>'],
+  };
+  const out = document.getElementById('out');
+  for (const [name, [size, svg]] of Object.entries(svgs)) {
+    const img = new Image();
+    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+    await new Promise(r => { img.onload = r; img.src = url; });
+    const c = document.createElement('canvas'); c.width = size; c.height = size;
+    c.getContext('2d').drawImage(img, 0, 0, size, size);
+    const a = document.createElement('a'); a.download = name; a.href = c.toDataURL('image/png'); a.textContent = 'Download ' + name;
+    out.appendChild(a); out.appendChild(c);
+  }
+  window.K1_ICONS_READY = true;
+})();
+</script>
+</body>
+</html>

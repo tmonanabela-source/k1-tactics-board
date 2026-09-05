@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <title>K1 Shooters · Tactics Board</title>
+  <meta name="description" content="K1 Shooters Football Academy tactics board — formations, set pieces, animated moves, drills, squad, sessions and match day. Laptop and phone.">
+  <meta name="theme-color" content="#0b1116">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="K1 Tactics">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="topbar" id="topbar">
+      <button class="icon-btn only-mobile" id="btnMenu" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="brand" id="brand"></div>
+      <div class="title-wrap"><input id="boardTitle" class="title-input" spellcheck="false" aria-label="Board title" value="Untitled board"></div>
+      <div class="topbar-actions" id="topActions"></div>
+    </header>
+
+    <aside class="toolrail" id="toolrail" aria-label="Tools"></aside>
+
+    <main class="stage" id="stage">
+      <div class="board-wrap" id="boardWrap">
+        <svg id="board" class="board" role="img" aria-label="Tactics board"></svg>
+        <div class="hud hud-tl" id="hudTL"></div>
+        <div class="hud hud-tr" id="hudTR"></div>
+        <div class="hud hud-bc" id="hudBC"></div>
+        <div class="selbar" id="selbar" hidden></div>
+        <div class="text-editor" id="textEditor" hidden>
+          <textarea rows="2" aria-label="Text label"></textarea>
+          <div class="te-actions"><button class="btn btn-sm te-cancel" type="button">Cancel</button><button class="btn btn-sm btn-primary te-ok" type="button">Place</button></div>
+        </div>
+      </div>
+      <div class="tray" id="tray" aria-label="Players and equipment"></div>
+      <div class="framesbar" id="framesBar" aria-label="Frames"></div>
+    </main>
+
+    <aside class="sidepanel" id="sidepanel">
+      <nav class="tabs" id="tabs" aria-label="Panels"></nav>
+      <div class="pane" id="pane"></div>
+    </aside>
+
+    <nav class="mobilebar" id="mobilebar" aria-label="Sections"></nav>
+  </div>
+
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-backdrop"></div>
+    <div class="sheet-panel" role="dialog" aria-modal="true">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><div class="sheet-title" id="sheetTitle"></div><button class="icon-btn" id="sheetClose" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+      <div class="sheet-body" id="sheetBody"></div>
+    </div>
+  </div>
+  <div id="modal" class="modal" hidden></div>
+  <div id="ctxmenu" class="ctxmenu menu" hidden></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <input type="file" id="fileInput" hidden>
+
+  <script src="js/icons.js"></script>
+  <script src="js/logo-data.js"></script>
+  <script src="js/logo.js"></script>
+  <script src="js/kits.js"></script>
+  <script src="js/formations.js"></script>
+  <script src="js/pitch.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/setpieces.js"></script>
+  <script src="js/drills.js"></script>
+  <script src="js/tactics.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/anim.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/gif.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/squad.js"></script>
+  <script src="js/teams.js"></script>
+  <script src="js/match.js"></script>
+  <script src="js/session.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/panes.js"></script>
+  <script src="js/panes-teams.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
