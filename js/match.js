@@ -108,7 +108,12 @@
     s.possession.current = null;
     M.save();
   };
-  M.finish = function () { M.pause(); M.state().period = 'END'; M.state().possession.current = null; M.save(); };
+  M.finish = function () {
+    M.pause(); M.state().period = 'END'; M.state().possession.current = null; M.save();
+    // a fixture run from a competition writes its result back
+    if (M.state().compId && K1.Competitions) { const r = K1.Competitions.saveFromLive(); if (r && K1.UI) K1.UI.toast('Result saved to ' + (M.state().competition || 'the competition'), 'ok', 3000); }
+  };
+  M.saveToCompetition = function () { if (!M.state().compId || !K1.Competitions) return null; return K1.Competitions.saveFromLive(); };
   M.setPeriod = function (id) { M.pause(); M.state().period = id; M.state().clock.base = 0; M.save(); };
   M.adjustClock = function (deltaMs) { const s = M.state(); s.clock.base = Math.max(0, s.clock.base + deltaMs); M.save(); };
 

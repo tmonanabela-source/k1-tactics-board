@@ -170,6 +170,7 @@
     const M = K1.Match; const m = M.state(); const sc = M.score(); const pos = M.possessionPct(); const per = M.period();
     clearInterval(matchTimer);
     let s = '';
+    if (m.compId && K1.Competitions) { const comp = K1.Competitions.get(m.compId); if (comp) { const cm = comp.matches.find(x => x.id === m.compMatchId); s += '<div class="comp-link">' + icon('trophy', { size: 15 }) + '<span><b>' + esc(comp.name) + '</b>' + (cm ? ' · ' + esc(K1.Competitions.matchLabel(comp, cm)) : '') + '</span><button class="btn btn-sm" data-act="savecomp">Save result</button></div>'; } }
     const teams = K1.Teams ? K1.Teams.sorted() : [];
     if (teams.length) s += '<div class="row"><span class="row-label">Team</span><select class="select" data-mteam>' + teams.map(t => '<option value="' + t.id + '"' + (t.id === m.teamId ? ' selected' : '') + '>' + esc(t.name) + ' · ' + esc(K1.Teams.formatLabel(t.pitch)) + '</option>').join('') + '<option value=""' + (!m.teamId ? ' selected' : '') + '>Other / none</option></select></div>';
     s += '<div class="scoreboard"><div class="sb-team"><input class="input center" data-mf="home" value="' + esc(m.home) + '"><div class="score">' + sc.home + '</div></div><div class="sb-mid"><div class="period">' + esc(per.label) + '</div><div class="clock" id="mClock">' + M.clockText() + '</div><div class="muted small" id="mMin">' + M.matchMinuteLabel() + '</div></div><div class="sb-team"><input class="input center" data-mf="away" value="' + esc(m.away) + '"><div class="score">' + sc.away + '</div></div></div>';
@@ -206,6 +207,7 @@
       const a = b.dataset.act;
       if (a === 'start') M.start(); else if (a === 'pause') M.pause(); else if (a === 'end') M.endPeriod(); else if (a === 'finish') { if (await UI().confirm('Finish the match?')) M.finish(); }
       else if (a === 'min-') M.adjustClock(-60000); else if (a === 'min+') M.adjustClock(60000);
+      else if (a === 'savecomp') { const r = M.saveToCompetition(); UI().toast(r ? 'Result saved to the competition' : 'No competition linked to this match', r ? 'ok' : 'warn'); }
       else if (a === 'copy') { try { await navigator.clipboard.writeText(M.summaryText()); UI().toast('Report copied', 'ok'); } catch (e) { UI().modal({ title: 'Match report', body: '<textarea class="input mono" rows="12" readonly>' + esc(M.summaryText()) + '</textarea>' }); } }
       else if (a === 'share') { if (navigator.share) { try { await navigator.share({ title: 'Match report', text: M.summaryText() }); } catch (e) { /* cancelled */ } } else { try { await navigator.clipboard.writeText(M.summaryText()); UI().toast('Report copied', 'ok'); } catch (e) { /* ignore */ } } }
       else if (a === 'new') { if (await UI().confirm('Archive this match and start a new one?')) M.newMatch(); }

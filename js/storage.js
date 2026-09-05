@@ -3,7 +3,7 @@
   'use strict';
 
   const ST = {};
-  const KEYS = { boards: 'k1tb:boards', current: 'k1tb:current', logo: 'k1tb:logo', squad: 'k1tb:squad', match: 'k1tb:match', sessions: 'k1tb:sessions', matches: 'k1tb:matches', teams: 'k1tb:teams', activeTeam: 'k1tb:activeTeam' };
+  const KEYS = { boards: 'k1tb:boards', current: 'k1tb:current', logo: 'k1tb:logo', squad: 'k1tb:squad', match: 'k1tb:match', sessions: 'k1tb:sessions', matches: 'k1tb:matches', teams: 'k1tb:teams', activeTeam: 'k1tb:activeTeam', competitions: 'k1tb:competitions' };
   ST.KEYS = KEYS;
 
   ST.get = function (key, def) { try { const v = localStorage.getItem(key); return v == null ? def : JSON.parse(v); } catch (e) { return def; } };
@@ -99,7 +99,7 @@
     ST.shareOrDownload(blob, ST.safeName(doc.title) + '.k1board.json', doc.title);
   };
   ST.exportAll = function () {
-    const payload = { app: 'k1-tactics-board', v: 2, exportedAt: Date.now(), boards: ST.listBoards().map(b => b.doc), squad: ST.get(KEYS.squad, []), teams: ST.get(KEYS.teams, []), sessions: ST.get(KEYS.sessions, []), matches: ST.get(KEYS.matches, []), settings: K1.settings };
+    const payload = { app: 'k1-tactics-board', v: 2, exportedAt: Date.now(), boards: ST.listBoards().map(b => b.doc), squad: ST.get(KEYS.squad, []), teams: ST.get(KEYS.teams, []), sessions: ST.get(KEYS.sessions, []), matches: ST.get(KEYS.matches, []), competitions: ST.get(KEYS.competitions, []), settings: K1.settings };
     const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
     ST.shareOrDownload(blob, 'K1-Shooters-playbook-' + new Date().toISOString().slice(0, 10) + '.json', 'K1 playbook backup');
   };
@@ -107,6 +107,7 @@
     let data;
     try { data = JSON.parse(text); } catch (e) { throw new Error('That file is not valid JSON.'); }
     if (data && data.board) { K1.loadDoc(data.board, { dirty: true }); return { boards: 1 }; }
+    if (data && data.competition && K1.Competitions) { const list = K1.Competitions.list(); const c = data.competition; c.id = c.id || K1.uid('cp'); const i = list.findIndex(x => x.id === c.id); if (i >= 0) list[i] = c; else list.unshift(c); K1.Competitions.save(); return { boards: 0, competitions: 1 }; }
     if (data && Array.isArray(data.boards)) {
       const list = ST.listBoards();
       let n = 0;
@@ -123,7 +124,8 @@
       if (Array.isArray(data.squad) && data.squad.length) { ST.set(KEYS.squad, data.squad); if (K1.Squad) K1.Squad.save(data.squad); }
       if (Array.isArray(data.sessions) && data.sessions.length) ST.set(KEYS.sessions, data.sessions);
       if (Array.isArray(data.matches) && data.matches.length) ST.set(KEYS.matches, data.matches);
-      K1.emit('library'); K1.emit('teams'); K1.emit('squad'); K1.emit('sessions');
+      if (Array.isArray(data.competitions) && data.competitions.length && K1.Competitions) { const cl = K1.Competitions.list(); data.competitions.forEach(c => { const i = cl.findIndex(x => x.id === c.id); if (i >= 0) cl[i] = c; else cl.push(c); }); K1.Competitions.save(); }
+      K1.emit('library'); K1.emit('teams'); K1.emit('squad'); K1.emit('sessions'); K1.emit('comps');
       return { boards: n };
     }
     if (data && data.frames && data.pitch) { K1.loadDoc(data, { dirty: true }); return { boards: 1 }; }

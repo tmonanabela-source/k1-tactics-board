@@ -67,6 +67,7 @@
     { id: 'frames', icon: 'film', label: 'Animate' },
     { id: 'match', icon: 'whistle', label: 'Match' },
     { id: 'sessions', icon: 'calendar', label: 'Sessions' },
+    { id: 'comps', icon: 'trophy', label: 'Comps' },
     { id: 'library', icon: 'folder', label: 'Library' },
   ];
 
@@ -93,6 +94,7 @@
     K1.on('squad', () => refreshPaneIf(['team']));
     K1.on('sessions', () => refreshPaneIf(['sessions']));
     K1.on('match', () => refreshPaneIf(['match']));
+    K1.on('comps', () => refreshPaneIf(['comps']));
     K1.on('logo', () => { buildBrand(); });
     K1.on('saved', updateTopbar);
     window.addEventListener('resize', () => { updateHUD(); });
@@ -474,7 +476,7 @@
   }
   /** Open a pane: side panel on desktop, bottom sheet on phone. */
   UI.openPane = function (id) {
-    if (id === 'more') { return UI.sheet('More', body => { body.innerHTML = '<div class="more-grid">' + [['team', 'users', 'Teams'], ['sessions', 'calendar', 'Sessions'], ['library', 'folder', 'Library'], ['settings', 'settings', 'Settings'], ['help', 'help', 'Help'], ['install', 'smartphone', 'Install app'], ['share', 'share', 'Share'], ['import', 'upload', 'Import'], ['backup', 'download', 'Back up']].map(x => '<button class="more-item" data-more="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('') + '</div>'; $$('[data-more]', body).forEach(b => { b.onclick = () => { const m = b.dataset.more; UI.closeSheet(); if (m === 'settings') UI.showSettings(); else if (m === 'help') UI.showHelp(); else if (m === 'install') UI.installApp(); else if (m === 'share') UI.shareDialog(); else if (m === 'import') UI.importFile(); else if (m === 'backup') K1.Store.exportAll(); else UI.openPane(m); }; }); }, 'more'); }
+    if (id === 'more') { return UI.sheet('More', body => { body.innerHTML = '<div class="more-grid">' + [['team', 'users', 'Teams'], ['comps', 'trophy', 'Tournaments'], ['sessions', 'calendar', 'Sessions'], ['library', 'folder', 'Library'], ['settings', 'settings', 'Settings'], ['help', 'help', 'Help'], ['install', 'smartphone', 'Install app'], ['share', 'share', 'Share'], ['import', 'upload', 'Import'], ['backup', 'download', 'Back up']].map(x => '<button class="more-item" data-more="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('') + '</div>'; $$('[data-more]', body).forEach(b => { b.onclick = () => { const m = b.dataset.more; UI.closeSheet(); if (m === 'settings') UI.showSettings(); else if (m === 'help') UI.showHelp(); else if (m === 'install') UI.installApp(); else if (m === 'share') UI.shareDialog(); else if (m === 'import') UI.importFile(); else if (m === 'backup') K1.Store.exportAll(); else UI.openPane(m); }; }); }, 'more'); }
     if (id === 'tray') { return UI.sheet('Add to the pitch', body => { body.innerHTML = '<div class="tray-sheet">' + trayHTML() + '</div><p class="hint">Tap an item, then tap the pitch to place it (players number themselves). Tap again to place more. Drag from here also works.</p>'; bindTray(body); }, 'tray'); }
     if (K1.isMobile()) { UI.sheet(TABS.find(t => t.id === id) ? TABS.find(t => t.id === id).label : id, body => { const fn = K1.Panes && K1.Panes[id]; body.dataset.pane = id; if (fn) fn(body); }, id); }
     else UI.showTab(id);
