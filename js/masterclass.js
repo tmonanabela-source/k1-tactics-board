@@ -71,6 +71,10 @@
         (s.quote ? '<blockquote>“' + esc(s.quote.text) + '”<cite>' + esc(s.quote.by) + (s.quote.source ? ' · ' + esc(s.quote.source) : '') + '</cite></blockquote>' : '') +
         (s.coaching && s.coaching.length ? '<div class="cp"><b>Coaching points</b><ul>' + s.coaching.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul></div>' : '') +
         (s.note ? '<p class="note">' + esc(s.note) + '</p>' : '') +
+        (s.say ? '<div class="say"><b>What to say</b>' +
+          (s.say.script ? '<p>' + esc(s.say.script) + '</p>' : '') +
+          (s.say.ask ? '<p><i>Ask them:</i> ' + esc(s.say.ask) + '</p>' : '') +
+          (s.say.cue ? '<p><i>Keep shouting:</i> ' + esc(s.say.cue) + '</p>' : '') + '</div>' : '') +
         '</div>' + (pic ? '<div class="sl-pic">' + pic + (s.caption ? '<span class="cap">' + esc(s.caption) + '</span>' : '') + '</div>' : '') + '</section>';
     });
     return '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(mc.title) + '</title><style>' +
@@ -87,6 +91,9 @@
       'blockquote cite{display:block;margin-top:6px;font-style:normal;font-size:12px;color:#666}' +
       '.cp{background:#f4f6f8;padding:10px 14px;border-radius:8px;margin-top:10px;font-size:14px}.cp b{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#555}' +
       '.note{color:#666;font-size:13px;font-style:italic}' +
+      '.say{border:1px dashed #c9a227;background:#fffdf5;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:14px;line-height:1.5}' +
+      '.say b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#a07d05;margin-bottom:4px}' +
+      '.say p{margin:4px 0}.say i{color:#a07d05;font-style:normal;font-weight:700}' +
       '.sl-pic svg{width:100%;height:auto;border-radius:8px;border:1px solid #ccc;display:block}' +
       '.sl-pic .cap{display:block;font-size:12px;color:#666;margin-top:6px}' +
       '.sl.chapter{background:#131c21;color:#fff;padding:16px 20px;border-radius:10px;grid-template-columns:1fr}' +

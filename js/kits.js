@@ -9,6 +9,7 @@
     { id: 'barcelona', name: 'Barcelona', primary: '#a50044', secondary: '#004d98', pattern: 'halves', number: '#edbb00', gk: '#3fbf5f', gkNumber: '#0b1116', club: true },
     { id: 'mancity', name: 'Man City', primary: '#6cabdd', secondary: '#1c2c5b', pattern: 'solid', number: '#ffffff', gk: '#f2c025', gkNumber: '#0b1116', club: true },
     { id: 'realmadrid', name: 'Real Madrid', primary: '#ffffff', secondary: '#febe10', pattern: 'solid', number: '#1c1c1c', gk: '#2f6f3e', gkNumber: '#ffffff', club: true },
+    { id: 'arsenal', name: 'Arsenal', primary: '#ef0107', secondary: '#ffffff', pattern: 'solid', number: '#ffffff', gk: '#b8ff3c', gkNumber: '#0b1116', club: true },
     { id: 'pirates', name: 'Orlando Pirates', primary: '#0b0b0b', secondary: '#ffffff', pattern: 'stripes', number: '#ffffff', gk: '#ffd400', gkNumber: '#0b0b0b', club: true },
     { id: 'red', name: 'Red', primary: '#e11d2e', secondary: '#ffffff', pattern: 'solid', number: '#ffffff', gk: '#2dd4bf', gkNumber: '#0b1116' },
     { id: 'blue', name: 'Blue', primary: '#1d4ed8', secondary: '#ffffff', pattern: 'solid', number: '#ffffff', gk: '#facc15', gkNumber: '#0b1116' },

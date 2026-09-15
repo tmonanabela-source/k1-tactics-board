@@ -159,33 +159,58 @@
     return s;
   }
 
-  function overlaySVG(d, t, overlay) {
+  /* Lane and zone names, in the words the boys hear on the board — Wide, Half-space, Centre.
+   * The markings group is rotated when the phone is held upright, so every label
+   * counter-rotates to stay the right way up in portrait. */
+  function zoneLabel(x, y, text, col, size, rot) {
+    return '<text transform="translate(' + f(x) + ' ' + f(y) + ')' + (rot ? ' rotate(' + rot + ')' : '') +
+      '" dy=".36em" text-anchor="middle" font-size="' + f(size) +
+      '" font-weight="800" fill="' + col + '" style="font-family:Inter,\'Segoe UI\',Arial,sans-serif;letter-spacing:.12em">' + text + '</text>';
+  }
+
+  function overlaySVG(d, t, overlay, portrait) {
     if (!overlay || overlay === 'none') return '';
     const L = d.L, W = d.W;
     const col = t.line, op = .35, lw = .16;
     let s = '<g class="overlay" opacity="' + op + '">';
+    let lab = '';
     const v = x => '<line x1="' + f(x) + '" y1="0" x2="' + f(x) + '" y2="' + f(W) + '" stroke="' + col + '" stroke-width="' + lw + '" stroke-dasharray="1.4 1"/>';
     const h = y => '<line x1="0" y1="' + f(y) + '" x2="' + f(L) + '" y2="' + f(y) + '" stroke="' + col + '" stroke-width="' + lw + '" stroke-dasharray="1.4 1"/>';
     const laneYs = d.penArea && d.goalArea
       ? [W / 2 - d.penArea.w / 2, W / 2 - d.goalArea.w / 2, W / 2 + d.goalArea.w / 2, W / 2 + d.penArea.w / 2]
       : [W * .2, W * .37, W * .63, W * .8];
-    if (overlay === 'thirds') { s += v(L / 3) + v(2 * L / 3); }
-    else if (overlay === 'lanes') {
+    // band centres, top to bottom: wide, half-space, centre, half-space, wide
+    const edges = [0].concat(laneYs, [W]);
+    const laneNames = ['WIDE', 'HALF-SPACE', 'CENTRE', 'HALF-SPACE', 'WIDE'];
+    const fs = Math.max(1.05, W * .023);
+    // Labels live in the margin outside the touchline, never on top of a player.
+    // In portrait the whole markings group is rotated, so each label counter-rotates.
+    const laneRot = portrait ? 90 : -90;
+    const drawLanes = () => {
       // shade the half-spaces (lanes 2 and 4), the zone every possession coach talks about
       s += '<rect x="0" y="' + f(laneYs[0]) + '" width="' + f(L) + '" height="' + f(laneYs[1] - laneYs[0]) + '" fill="' + col + '" opacity=".16"/>';
       s += '<rect x="0" y="' + f(laneYs[2]) + '" width="' + f(L) + '" height="' + f(laneYs[3] - laneYs[2]) + '" fill="' + col + '" opacity=".16"/>';
       laneYs.forEach(y => { s += h(y); });
-    }
+    };
+    const nameLanes = () => laneNames.forEach((n, i) => { lab += zoneLabel(-MARGIN * .34, (edges[i] + edges[i + 1]) / 2, n, col, fs, laneRot); });
+    const nameThirds = () => ['OWN THIRD', 'MIDDLE THIRD', 'FINAL THIRD'].forEach((n, i) => { lab += zoneLabel(L * (i + .5) / 3, -MARGIN * .34, n, col, fs * .92, 0); });
+
+    if (overlay === 'thirds') { s += v(L / 3) + v(2 * L / 3); }
+    else if (overlay === 'lanes') { drawLanes(); }
+    else if (overlay === 'laneslab') { drawLanes(); nameLanes(); }
+    else if (overlay === 'zones15') { drawLanes(); s += v(L / 3) + v(2 * L / 3); nameLanes(); nameThirds(); }
     else if (overlay === 'zones18') { for (let i = 1; i < 6; i++) s += v(L * i / 6); s += h(W / 3) + h(2 * W / 3); }
     else if (overlay === 'zones20') { for (let i = 1; i < 4; i++) s += v(L * i / 4); laneYs.forEach(y => { s += h(y); }); }
     else if (overlay === 'grid5') { for (let x = 5; x < L; x += 5) s += v(x); for (let y = 5; y < W; y += 5) s += h(y); }
     else if (overlay === 'grid10') { for (let x = 10; x < L; x += 10) s += v(x); for (let y = 10; y < W; y += 10) s += h(y); }
     s += '</g>';
+    // labels sit outside the faint overlay group so the words stay readable on grass
+    if (lab) s += '<g class="overlay-labels" opacity=".92">' + lab + '</g>';
     return s;
   }
 
   /** Full pitch layer markup, authored in pitch space (wrap in the projection transform). */
-  function markingsSVG(d, t, overlay) {
+  function markingsSVG(d, t, overlay, portrait) {
     const L = d.L, W = d.W, cx = L / 2, cy = W / 2, lw = .25;
     let s = '';
     s += '<rect x="0" y="0" width="' + f(L) + '" height="' + f(W) + '" fill="' + t.grass + '"/>';
@@ -197,9 +222,9 @@
       for (let y = step; y < W; y += step) s += '<line x1="0" y1="' + f(y) + '" x2="' + f(L) + '" y2="' + f(y) + '" stroke="' + t.line + '" stroke-width=".1"/>';
       s += '</g>';
       s += '<rect x="0" y="0" width="' + f(L) + '" height="' + f(W) + '" fill="none" stroke="' + t.line + '" stroke-width="' + lw + '"/>';
-      return s + overlaySVG(d, t, overlay);
+      return s + overlaySVG(d, t, overlay, portrait);
     }
-    s += overlaySVG(d, t, overlay);
+    s += overlaySVG(d, t, overlay, portrait);
     // boundary
     s += '<rect x="0" y="0" width="' + f(L) + '" height="' + f(W) + '" fill="none" stroke="' + t.line + '" stroke-width="' + lw + '"/>';
     if (d.futsal) {

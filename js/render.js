@@ -121,7 +121,7 @@
     if (key === pitchKey) return;
     pitchKey = key;
     bgRect.setAttribute('fill', t.outer);
-    pitchLayer.innerHTML = '<g transform="' + proj.transform + '">' + K1.markingsSVG(d, t, doc.pitch.overlay) + '</g>';
+    pitchLayer.innerHTML = '<g transform="' + proj.transform + '">' + K1.markingsSVG(d, t, doc.pitch.overlay, proj.portrait) + '</g>';
     defsEl.innerHTML = defsSVG();
     svg.classList.toggle('portrait', proj.portrait);
     K1.emit('pitch');
@@ -704,7 +704,7 @@
     s += '<svg x="0" y="' + headH + '" width="' + W + '" height="' + boardH + '" viewBox="' + f(p.baseView.x) + ' ' + f(p.baseView.y) + ' ' + f(p.baseView.w) + ' ' + f(p.baseView.h) + '" preserveAspectRatio="xMidYMid meet">';
     s += '<defs>' + defsSVG(ctx.photos) + '</defs>';
     s += '<rect x="-500" y="-500" width="1000" height="1000" fill="' + t.outer + '"/>';
-    s += '<g transform="' + p.transform + '">' + K1.markingsSVG(d, t, doc.pitch.overlay) + '</g>';
+    s += '<g transform="' + p.transform + '">' + K1.markingsSVG(d, t, doc.pitch.overlay, p.portrait) + '</g>';
     s += objs;
     s += '</svg>';
     if (header) {

@@ -10,7 +10,18 @@
   const UI = () => K1.UI;
   const MC = () => K1.Masterclass;
 
-  let current = null, slideIx = 0;
+  let current = null, slideIx = 0, showNotes = false;
+
+  /* The coach's script: the words to say, the question to ask instead of the instruction
+   * to give, and the one cue to repeat. Optional on every slide — old slides are unaffected. */
+  function sayHTML(sl, cls) {
+    const say = sl && sl.say; if (!say) return '';
+    return '<div class="ms-say' + (cls ? ' ' + cls : '') + '"><b>What to say</b>' +
+      (say.script ? '<p>' + esc(say.script) + '</p>' : '') +
+      (say.ask ? '<p class="ms-ask"><span>Ask them</span>' + esc(say.ask) + '</p>' : '') +
+      (say.cue ? '<p class="ms-cue"><span>Keep shouting</span>' + esc(say.cue) + '</p>' : '') +
+      '</div>';
+  }
   const section = (title, body) => '<section class="pane-section">' + (title ? '<h4>' + title + '</h4>' : '') + body + '</section>';
   P.openMasterclass = (id, ix) => { current = id; slideIx = ix || 0; };
 
@@ -47,6 +58,7 @@
       (sl.quote ? '<blockquote>“' + esc(sl.quote.text) + '”<cite>' + esc(sl.quote.by) + (sl.quote.source ? ' · ' + esc(sl.quote.source) : '') + '</cite></blockquote>' : '') +
       (sl.coaching && sl.coaching.length ? '<div class="ms-cp"><b>Coaching points</b><ul>' + sl.coaching.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul></div>' : '') +
       (sl.note ? '<p class="ms-note">' + esc(sl.note) + '</p>' : '') +
+      sayHTML(sl) +
       (sl.board ? '<div class="row wrap"><button class="btn btn-sm" data-open="' + i + '">' + icon('grid', { size: 15 }) + '<span>Open on the board</span></button><button class="btn btn-sm btn-ghost" data-present="' + i + '">' + icon('fullscreen', { size: 15 }) + '<span>Present from here</span></button></div>' : '') +
       '</div>' + (pic ? '<div class="ms-pic" data-open="' + i + '">' + pic + (sl.caption ? '<span class="cap">' + esc(sl.caption) + '</span>' : '') + '</div>' : '') + '</div>';
   }
@@ -98,6 +110,7 @@
       '<div class="mcp-bar"><button class="icon-btn" data-p="prev" title="Previous (←)">' + icon('chevronLeft') + '</button>' +
       '<span class="mcp-title" id="mcpTitle"></span>' +
       '<span class="mcp-count" id="mcpCount"></span>' +
+      '<button class="icon-btn" data-p="notes" title="Coach’s script (N)">' + icon('book') + '</button>' +
       '<button class="icon-btn" data-p="board" title="Open this board on the pitch">' + icon('grid') + '</button>' +
       '<button class="icon-btn" data-p="next" title="Next (→)">' + icon('chevronRight') + '</button>' +
       '<button class="icon-btn" data-p="exit" title="Exit (Esc)">' + icon('x') + '</button></div>' +
@@ -106,7 +119,7 @@
     document.body.classList.add('mc-presenting');
     pres = { el, mc };
     if (document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
-    $$('[data-p]', el).forEach(b => { b.onclick = () => { const a = b.dataset.p; if (a === 'prev') step(-1); else if (a === 'next') step(1); else if (a === 'board') { openSlideBoard(mc, slideIx); closePresent(); } else closePresent(); }; });
+    $$('[data-p]', el).forEach(b => { b.onclick = () => { const a = b.dataset.p; if (a === 'prev') step(-1); else if (a === 'next') step(1); else if (a === 'notes') toggleNotes(); else if (a === 'board') { openSlideBoard(mc, slideIx); closePresent(); } else closePresent(); }; });
     el.addEventListener('click', e => { if (e.target === el || e.target.closest('.mcp-stage')) step(1); });
     window.addEventListener('keydown', onKey, true);
     drawSlide();
@@ -126,16 +139,20 @@
       (sl.points && sl.points.length ? '<ul>' + sl.points.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
       (sl.quote ? '<blockquote>“' + esc(sl.quote.text) + '”<cite>' + esc(sl.quote.by) + '</cite></blockquote>' : '') +
       (sl.coaching && sl.coaching.length ? '<div class="cp"><b>Coaching points</b><ul>' + sl.coaching.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul></div>' : '');
+    txt.innerHTML += sayHTML(sl, 'in-present');
+    pres.el.classList.toggle('show-notes', showNotes);
     $('#mcpTitle', pres.el).textContent = mc.title;
     $('#mcpCount', pres.el).textContent = (slideIx + 1) + ' / ' + mc.slides.length;
     $('#mcpProg', pres.el).style.width = ((slideIx + 1) / mc.slides.length * 100) + '%';
   }
+  function toggleNotes() { showNotes = !showNotes; if (pres) pres.el.classList.toggle('show-notes', showNotes); }
   function onKey(e) {
     if (!pres) return;
     const k = e.key;
     if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); e.stopPropagation(); step(1); }
     else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); e.stopPropagation(); step(-1); }
     else if (k === 'Escape') { e.preventDefault(); e.stopPropagation(); closePresent(); }
+    else if (k === 'n' || k === 'N') { e.preventDefault(); e.stopPropagation(); toggleNotes(); }
     else if (k === 'Home') { slideIx = 0; drawSlide(); }
     else if (k === 'End') { slideIx = pres.mc.slides.length - 1; drawSlide(); }
   }

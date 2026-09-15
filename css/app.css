@@ -764,3 +764,42 @@ body.presenting .board-wrap { background: #06090c; }
   .app { display: block; height: auto; }
   .board-wrap { height: 90vh; }
 }
+
+/* ---------- The coach's script ------------------------------------------
+   The words to say, the question to ask, the cue to shout. Visible on the
+   slide card and in the printed handout; hidden in the presenter until the
+   coach presses N, because the boys are looking at that screen. */
+.ms-say {
+  border: 1px dashed rgba(245, 179, 1, .55);
+  background: rgba(245, 179, 1, .07);
+  border-radius: 10px;
+  padding: 10px 13px;
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.ms-say > b {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: #f5b301;
+  margin-bottom: 5px;
+}
+.ms-say p { margin: 5px 0; }
+.ms-say .ms-ask span,
+.ms-say .ms-cue span {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 800;
+  opacity: .75;
+  margin-right: 7px;
+}
+.ms-say .ms-cue { font-weight: 600; }
+
+/* In the presenter it stays out of sight until the coach asks for it. */
+.mc-present .ms-say.in-present { display: none; }
+.mc-present.show-notes .ms-say.in-present { display: block; }
+.mc-present.show-notes [data-p="notes"] { color: #f5b301; }

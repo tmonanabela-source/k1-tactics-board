@@ -32,6 +32,16 @@
       ],
     },
     {
+      id: 'arsenal_433_325', club: 'Arsenal', name: 'Arsenal · 4-3-3 → 3-2-5, then let him go 1v1', kits: ['arsenal', 'blue'],
+      desc: 'Arsenal\u2019s Swagger, the way the club model means it: the structure is not the opposite of flair, it is what pays for it. The left-back steps inside to make a 3-2-5, the team overloads one side, then switches \u2014 and the far winger gets the ball with grass in front of him and permission to take his man on.',
+      frames: [
+        { home: '433', away: '4141mid', ball: [14, 34], caption: 'Base 4-3-3 \u00b7 centre-backs split, the 6 shows between them' },
+        { home: '325', away: '442low', ball: [44, 20], caption: 'Left-back steps in: 3-2-5 \u00b7 overload the left, five hold the last line' },
+        { home: '325', away: '442low', ball: [64, 60], caption: 'Switch \u00b7 the ball travels faster than they can slide \u2014 the right winger is 1v1' },
+        { home: '433press', away: '442', ball: [58, 40], caption: 'Ball lost: win it back at once \u2014 the shape is what buys the freedom' },
+      ],
+    },
+    {
       id: 'madrid_442_433', club: 'Real Madrid', name: 'Real Madrid · 4-4-2 block → 4-3-3 counter', kits: ['realmadrid', 'blue'],
       desc: 'Compact 4-4-2 low block with the wingers tucked in; on winning the ball the wide players sprint into a 4-3-3 counter with runners either side of the striker.',
       frames: [
