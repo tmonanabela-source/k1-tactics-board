@@ -917,3 +917,48 @@ body.presenting .board-wrap { background: #06090c; }
   .cur-band-name { width: auto; margin-bottom: 1px; }
   .cur-top { gap: 10px; }
 }
+
+/* ---------- Season plan: block roles, the spiral, the training week ------ */
+.cur-rev { display: inline-flex; align-items: center; gap: 5px; margin-top: 3px; color: var(--accent); opacity: .85; }
+.cur-rev svg { flex: none; }
+
+.cur-role {
+  font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em;
+  padding: 2px 7px; border-radius: 999px; flex: none;
+}
+.cur-role.r-introduce { background: rgba(56,189,248,.18); color: #7dd3fc; }
+.cur-role.r-develop { background: rgba(74,222,128,.16); color: #4ade80; }
+.cur-role.r-complicate { background: rgba(249,115,22,.18); color: #fb923c; }
+.cur-role.r-consolidate { background: rgba(245,179,1,.18); color: var(--accent); }
+.cur-role-hint { font-size: 12px; opacity: .6; margin: 0 0 8px; }
+
+.cur-recheck {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12.5px; line-height: 1.45;
+  background: rgba(245,179,1,.08); border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0; padding: 8px 12px; margin: 8px 0;
+}
+.cur-recheck svg { flex: none; margin-top: 2px; color: var(--accent); }
+
+.cur-micro { border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+.cur-micro h5 { margin: 0 0 4px; font-size: 14px; }
+.cur-micro-rows { display: grid; gap: 8px; margin-top: 10px; }
+.cur-micro-row { display: flex; gap: 12px; padding: 9px 11px; border-radius: 9px; background: rgba(255,255,255,.025); }
+.cur-micro-row.quiet { opacity: .55; }
+.cmr-day {
+  flex: none; width: 46px; font-weight: 800; font-size: 13px; text-align: center;
+  padding-top: 1px;
+}
+.cmr-day small { display: block; font-weight: 600; font-size: 9.5px; opacity: .55; letter-spacing: .05em; }
+.cmr-body { flex: 1; min-width: 0; }
+.cmr-body b { font-size: 13.5px; }
+.cmr-tags { display: inline-flex; flex-wrap: wrap; gap: 5px; margin-left: 8px; vertical-align: middle; }
+.cmr-space, .cmr-shape, .cmr-note { display: block; font-size: 12px; line-height: 1.45; opacity: .75; margin-top: 3px; }
+.cmr-note { font-style: italic; opacity: .6; }
+
+@media (max-width: 640px) {
+  .cur-micro-row { display: block; }
+  .cmr-day { width: auto; text-align: left; margin-bottom: 3px; }
+  .cmr-day small { display: inline; margin-left: 7px; }
+  .cmr-tags { display: flex; margin: 5px 0 0; }
+}

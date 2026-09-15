@@ -1,6 +1,7 @@
 /* K1 Shooters club app — the season plan view.
- * Forty weeks, four terms. Each week names the theme, the masterclass that teaches it, the
- * drills that train it, and what it looks like for each age band. Tick a week off per team. */
+ * Ten blocks of four weeks, spiralling: every block comes back to an earlier one, and the
+ * fourth week of each block re-checks the first week's idea after a delay. Plus the training
+ * week itself, mapped onto the club's own named nights. */
 (function (K1) {
   'use strict';
 
@@ -12,8 +13,9 @@
   const UI = () => K1.UI;
   const C = () => K1.Curriculum;
 
-  let openTerm = null;   // which term is expanded
-  let bandFilter = null; // null = show all bands
+  let openBlock = null;
+  let bandFilter = null;
+  let showWeek = false;   // the training-week panel
 
   function activeTeam() { return K1.Teams && K1.Teams.active ? K1.Teams.active() : null; }
   function teamId() { const t = activeTeam(); return t ? t.id : '_'; }
@@ -27,33 +29,36 @@
     const next = cur.next(teamId());
     const teamBand = team ? cur.bandFor(team.ageGroup || team.name) : null;
     if (bandFilter === null && teamBand) bandFilter = teamBand.id;
-
-    // open the term containing the next untaught week, first time in
-    if (openTerm === null) openTerm = next ? cur.termOf(next.n).n : 1;
+    if (openBlock === null) openBlock = next ? cur.blockOf(next.n).n : 1;
 
     let s = '<section class="pane-section"><h4>The season plan</h4>' +
-      '<p class="muted small">Forty weeks in four terms. Each week is one idea, the class that teaches it, and the drills that train it — with a different version for the little ones and the big ones. Tick a week when you have taught it.</p></section>';
+      '<p class="muted small">Ten blocks of four weeks: introduce, develop, complicate, consolidate. Every block comes back to an earlier one, because a boy of thirteen keeps about a third of what he is taught — so nothing here is taught only once.</p></section>';
 
-    /* progress + next up */
     s += '<div class="cur-top">' +
       '<div class="cur-prog"><div class="cur-bar"><i style="width:' + prog.pct + '%"></i></div>' +
       '<span>' + prog.done + ' of ' + prog.total + ' weeks taught' + (team ? ' &middot; ' + esc(team.name) : '') + '</span></div>' +
-      (next ? '<button class="btn btn-sm btn-primary" data-jump="' + next.n + '">' + icon('play', { size: 15 }) + '<span>Next up: week ' + next.n + ' &middot; ' + esc(next.theme) + '</span></button>' : '<span class="tag">Season complete</span>') +
+      (next ? '<button class="btn btn-sm btn-primary" data-jump="' + next.n + '">' + icon('play', { size: 15 }) + '<span>Next up: week ' + next.n + ' &middot; ' + esc(next.theme) + '</span></button>'
+            : '<span class="tag">Season complete</span>') +
+      '<button class="btn btn-sm btn-ghost" data-week-toggle>' + icon('calendar', { size: 15 }) + '<span>' + (showWeek ? 'Hide' : 'Show') + ' the training week</span></button>' +
       '</div>';
 
-    /* band filter */
+    if (showWeek) s += microcycleHTML(cur);
+
     s += '<div class="cur-bands"><button class="cur-chip' + (bandFilter ? '' : ' on') + '" data-band="">All ages</button>' +
       cur.BANDS.map(b => '<button class="cur-chip' + (bandFilter === b.id ? ' on' : '') + '" data-band="' + b.id + '">' + esc(b.name) + ' <small>' + esc(b.ages) + '</small></button>').join('') + '</div>';
 
-    /* terms */
-    cur.TERMS.forEach(t => {
-      const weeks = cur.weeksOfTerm(t);
+    cur.BLOCKS.forEach(b => {
+      const weeks = cur.weeksOfBlock(b);
       const doneN = weeks.filter(w => cur.done(teamId(), w.n)).length;
-      const open = openTerm === t.n;
+      const open = openBlock === b.n;
+      const rev = b.revisits ? cur.block(b.revisits) : null;
       s += '<div class="cur-term' + (open ? ' open' : '') + '">' +
-        '<button class="cur-term-head" data-term="' + t.n + '">' +
-        '<span class="cur-term-n">' + t.n + '</span>' +
-        '<span class="cur-term-b"><b>' + esc(t.name) + '</b><small>Weeks ' + t.weeks[0] + '&ndash;' + t.weeks[1] + ' &middot; ' + esc(t.lead) + '</small></span>' +
+        '<button class="cur-term-head" data-block="' + b.n + '">' +
+        '<span class="cur-term-n">' + b.n + '</span>' +
+        '<span class="cur-term-b"><b>' + esc(b.name) + '</b>' +
+        '<small>Weeks ' + b.weeks[0] + '&ndash;' + b.weeks[1] + ' &middot; ' + esc(b.lead) + '</small>' +
+        (rev ? '<small class="cur-rev">' + icon('loop', { size: 12 }) + ' Second pass on block ' + rev.n + ', ' + esc(rev.name.toLowerCase()) + '</small>' : '') +
+        '</span>' +
         '<span class="tag">' + doneN + '/' + weeks.length + '</span>' +
         icon(open ? 'chevronUp' : 'chevronDown', { size: 18 }) + '</button>';
       if (open) s += '<div class="cur-weeks">' + weeks.map(w => weekCard(w, cur)).join('') + '</div>';
@@ -64,21 +69,40 @@
     bind(root);
   };
 
+  function microcycleHTML(cur) {
+    return '<div class="cur-micro"><h5>The training week</h5>' +
+      '<p class="muted small">Never ask for the same physical quality two nights running. That one rule is what makes the week recover itself.</p>' +
+      '<div class="cur-micro-rows">' + cur.MICROCYCLE.map(d =>
+        '<div class="cur-micro-row' + (d.block === '(no session)' ? ' quiet' : '') + '">' +
+        '<span class="cmr-day">' + esc(d.day) + '<small>' + esc(d.md) + '</small></span>' +
+        '<span class="cmr-body"><b>' + esc(d.block) + '</b>' +
+        '<span class="cmr-tags"><span class="tag">' + esc(d.quality) + '</span><span class="tag">' + esc(d.scope) + '</span></span>' +
+        '<small class="cmr-space">' + esc(d.space) + '</small>' +
+        '<small class="cmr-shape">' + esc(d.shape) + '</small>' +
+        (d.note ? '<small class="cmr-note">' + esc(d.note) + '</small>' : '') +
+        '</span></div>').join('') + '</div></div>';
+  }
+
   function weekCard(w, cur) {
     const done = cur.done(teamId(), w.n);
     const mc = w.mc && K1.Masterclass ? K1.Masterclass.get(w.mc) : null;
     const drills = (w.drills || []).map(id => (K1.DRILLS || []).find(d => d.id === id)).filter(Boolean);
     const bands = cur.BANDS.filter(b => (!bandFilter || b.id === bandFilter) && w.bands[b.id]);
+    const role = cur.ROLES[w.role] || {};
+    const recheck = cur.recheck(w);
 
     return '<div class="cur-week' + (done ? ' done' : '') + '" id="cw' + w.n + '">' +
       '<div class="cur-week-head">' +
       '<button class="cur-tick" data-tick="' + w.n + '" title="' + (done ? 'Taught' : 'Mark as taught') + '">' + icon(done ? 'check' : 'dot', { size: 16 }) + '</button>' +
       '<span class="cur-w-n">Week ' + w.n + '</span>' +
+      '<span class="cur-role r-' + w.role + '">' + esc(role.name || w.role) + '</span>' +
       '<b>' + esc(w.theme) + '</b>' +
       '</div>' +
+      (role.hint ? '<p class="cur-role-hint">' + esc(role.hint) + '</p>' : '') +
       (bands.length ? '<div class="cur-band-rows">' + bands.map(b =>
         '<div class="cur-band-row"><span class="cur-band-name">' + esc(b.name) + '<small>' + esc(b.ages) + '</small></span>' +
         '<span class="cur-band-txt">' + esc(w.bands[b.id]) + '</span></div>').join('') + '</div>' : '') +
+      (recheck ? '<p class="cur-recheck">' + icon('loop', { size: 13 }) + ' Delayed check: go back to week ' + recheck.n + ', ' + esc(recheck.theme) + '. Asking at the end of a session tells you nothing. Asking three weeks later does.</p>' : '') +
       (w.note ? '<p class="cur-note">' + esc(w.note) + '</p>' : '') +
       '<div class="row wrap cur-acts">' +
       (mc ? '<button class="btn btn-sm" data-mc="' + mc.id + '">' + icon('sparkles', { size: 14 }) + '<span>' + esc(mc.title) + '</span></button>' : '') +
@@ -92,14 +116,17 @@
   function bind(root) {
     const cur = C();
 
-    $$('[data-term]', root).forEach(b => { b.onclick = () => { const n = Number(b.dataset.term); openTerm = (openTerm === n ? null : n); P.curriculum(root); }; });
+    const wt = $('[data-week-toggle]', root);
+    if (wt) wt.onclick = () => { showWeek = !showWeek; P.curriculum(root); };
 
+    $$('[data-block]', root).forEach(b => { b.onclick = () => { const n = Number(b.dataset.block); openBlock = (openBlock === n ? null : n); P.curriculum(root); }; });
     $$('[data-band]', root).forEach(b => { b.onclick = () => { bandFilter = b.dataset.band || null; P.curriculum(root); }; });
 
     $$('[data-jump]', root).forEach(b => { b.onclick = () => {
       const n = Number(b.dataset.jump);
-      openTerm = cur.termOf(n).n; P.curriculum(root);
-      const el = $('#cw' + n, root); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); }
+      openBlock = cur.blockOf(n).n; P.curriculum(root);
+      const el = $('#cw' + n, root);
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); }
     }; });
 
     $$('[data-tick]', root).forEach(b => { b.onclick = () => {
@@ -135,7 +162,10 @@
       const band = bandFilter ? cur.BANDS.find(x => x.id === bandFilter) : null;
       const txt = cur.shareWeek(w, band);
       const win = window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener');
-      if (!win) { try { await navigator.clipboard.writeText(txt); UI().toast('Copied — paste it into WhatsApp', 'ok'); } catch (e) { UI().modal({ title: 'Week ' + w.n, body: '<textarea class="input mono" rows="12" readonly>' + esc(txt) + '</textarea>' }); } }
+      if (!win) {
+        try { await navigator.clipboard.writeText(txt); UI().toast('Copied — paste it into WhatsApp', 'ok'); }
+        catch (e) { UI().modal({ title: 'Week ' + w.n, body: '<textarea class="input mono" rows="12" readonly>' + esc(txt) + '</textarea>' }); }
+      }
     }; });
   }
 
