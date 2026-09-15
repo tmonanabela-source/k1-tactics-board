@@ -66,6 +66,7 @@
     mc.slides.forEach((s, i) => {
       const pic = s.board ? M.previewSVG(s.board, 460, 300, s.title) : '';
       body += '<section class="sl' + (s.kind ? ' ' + s.kind : '') + '"><div class="sl-body"><h2><span class="n">' + (i + 1) + '</span>' + esc(s.title) + '</h2>' +
+        (s.define ? '<div class="def"><b>' + esc(s.define.term) + '</b>' + (s.define.meaning ? '<p>' + esc(s.define.meaning) + '</p>' : '') + (s.define.hurts ? '<p><i>Why it hurts them:</i> ' + esc(s.define.hurts) + '</p>' : '') + '</div>' : '') +
         (s.lead ? '<p class="lead">' + esc(s.lead) + '</p>' : '') +
         (s.points && s.points.length ? '<ul>' + s.points.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
         (s.quote ? '<blockquote>“' + esc(s.quote.text) + '”<cite>' + esc(s.quote.by) + (s.quote.source ? ' · ' + esc(s.quote.source) : '') + '</cite></blockquote>' : '') +
@@ -91,6 +92,8 @@
       'blockquote cite{display:block;margin-top:6px;font-style:normal;font-size:12px;color:#666}' +
       '.cp{background:#f4f6f8;padding:10px 14px;border-radius:8px;margin-top:10px;font-size:14px}.cp b{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#555}' +
       '.note{color:#666;font-size:13px;font-style:italic}' +
+      '.def{border-left:4px solid #131c21;background:#eef1f4;padding:9px 14px;margin:6px 0 10px;border-radius:0 8px 8px 0}' +
+      '.def b{font-size:15px;text-transform:uppercase;letter-spacing:.08em}.def p{margin:4px 0;font-size:14px}.def i{font-weight:700}' +
       '.say{border:1px dashed #c9a227;background:#fffdf5;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:14px;line-height:1.5}' +
       '.say b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#a07d05;margin-bottom:4px}' +
       '.say p{margin:4px 0}.say i{color:#a07d05;font-style:normal;font-weight:700}' +

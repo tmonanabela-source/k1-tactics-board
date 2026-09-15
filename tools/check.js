@@ -11,7 +11,7 @@ const root = path.join(__dirname, '..');
 const FILES = [
   'js/icons.js', 'js/logo-data.js', 'js/logo.js', 'js/kits.js', 'js/formations.js', 'js/pitch.js',
   'js/state.js', 'js/setpieces.js', 'js/drills.js', 'js/drills-k1.js', 'js/tactics.js', 'js/phases.js',
-  'js/masterclass.js', 'js/masterclass-content.js',
+  'js/masterclass.js', 'js/masterclass-content.js', 'js/masterclass-clubs.js', 'js/masterclass-core.js',
 ];
 
 const noop = () => {};

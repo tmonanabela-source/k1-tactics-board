@@ -79,6 +79,25 @@
       ],
     },
     {
+      id: 'rot_symmetric', club: 'Rotations', name: 'Symmetric rotation · the shape survives', kits: ['k1', 'red'],
+      desc: 'Three players swap jobs and the three zones stay occupied. The full-back comes inside, the winger holds the touchline, the eight pushes beyond them. Nothing about our shape has changed — only who is standing in each part of it. Their markers have to decide whether to follow or to hand over, and that hesitation is the whole point.',
+      frames: [
+        { home: '433', away: '4141mid', ball: [16, 34], caption: 'Before: full-back wide, winger wide, eight inside' },
+        { home: '325', away: '4141mid', ball: [40, 26], caption: 'After: full-back inside, winger holds width, eight higher — same three zones, different three players' },
+        { home: '325', away: '442low', ball: [58, 34], caption: 'Because the shape survived, we can keep building as if nothing happened' },
+      ],
+    },
+    {
+      id: 'rot_asymmetric', club: 'Rotations', name: 'Asymmetric rotation · break the shape on purpose', kits: ['k1', 'blue'],
+      desc: 'This time we do not keep the balance. We deliberately put three players on one side and accept being thin on the other, to make a numbers problem their defence cannot solve locally. It is more dangerous and it costs more if we lose the ball — which is exactly why the rest defence has to be right before we try it.',
+      frames: [
+        { home: '4231', away: '442', ball: [22, 34], caption: 'Balanced 4-2-3-1 · two and two' },
+        { home: '3241', away: '442low', ball: [48, 18], caption: 'Three of ours on the left, one on the right — they cannot cover it with two' },
+        { home: '325dz', away: '442low', ball: [70, 22], caption: 'The overload breaks through · note how few of ours are behind the ball' },
+        { home: '4222press', away: '235', ball: [52, 40], caption: 'The bill: if we lose it here, the counter comes down the side we emptied' },
+      ],
+    },
+    {
       id: 'youth_231_press', club: 'K1 Shooters', name: 'Youth 7v7 · 2-3-1 press & build', kits: ['k1', 'blue'], pitch: 'seven',
       desc: 'Simple 7-a-side shape. Without the ball the striker and wide players press together; with the ball the wide players get high and the midfielder supports underneath.',
       frames: [

@@ -12,6 +12,17 @@
 
   let current = null, slideIx = 0, showNotes = false;
 
+  /* Definition first, footage second. Every concept module opens with one of these:
+   * the term, what it means in one sentence, and what problem it makes for the opponent.
+   * A concept nobody can name is a concept nobody can be coached on. */
+  function defineHTML(sl) {
+    const d = sl && sl.define; if (!d) return '';
+    return '<div class="ms-def"><span class="ms-term">' + esc(d.term) + '</span>' +
+      (d.meaning ? '<p class="ms-mean">' + esc(d.meaning) + '</p>' : '') +
+      (d.hurts ? '<p class="ms-hurts"><span>Why it hurts them</span>' + esc(d.hurts) + '</p>' : '') +
+      '</div>';
+  }
+
   /* The coach's script: the words to say, the question to ask instead of the instruction
    * to give, and the one cue to repeat. Optional on every slide — old slides are unaffected. */
   function sayHTML(sl, cls) {
@@ -53,6 +64,7 @@
     const pic = sl.board ? MC().previewSVG(sl.board, 520, 340, sl.title) : '';
     return '<div class="mc-slide' + (sl.kind ? ' ' + sl.kind : '') + '" data-slide="' + i + '">' +
       '<div class="ms-body"><div class="ms-head"><span class="ms-n">' + (i + 1) + '</span><b>' + esc(sl.title) + '</b></div>' +
+      defineHTML(sl) +
       (sl.lead ? '<p class="ms-lead">' + esc(sl.lead) + '</p>' : '') +
       (sl.points && sl.points.length ? '<ul class="ms-points">' + sl.points.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
       (sl.quote ? '<blockquote>“' + esc(sl.quote.text) + '”<cite>' + esc(sl.quote.by) + (sl.quote.source ? ' · ' + esc(sl.quote.source) : '') + '</cite></blockquote>' : '') +
@@ -135,6 +147,7 @@
     pres.el.classList.toggle('no-pic', !svg);
     pres.el.classList.toggle('chapter', sl.kind === 'chapter');
     txt.innerHTML = '<h2>' + esc(sl.title) + '</h2>' +
+      defineHTML(sl) +
       (sl.lead ? '<p class="lead">' + esc(sl.lead) + '</p>' : '') +
       (sl.points && sl.points.length ? '<ul>' + sl.points.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul>' : '') +
       (sl.quote ? '<blockquote>“' + esc(sl.quote.text) + '”<cite>' + esc(sl.quote.by) + '</cite></blockquote>' : '') +

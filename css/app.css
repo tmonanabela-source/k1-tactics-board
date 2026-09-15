@@ -803,3 +803,34 @@ body.presenting .board-wrap { background: #06090c; }
 .mc-present .ms-say.in-present { display: none; }
 .mc-present.show-notes .ms-say.in-present { display: block; }
 .mc-present.show-notes [data-p="notes"] { color: #f5b301; }
+
+/* ---------- Definition first --------------------------------------------
+   The term, what it means, and what problem it makes for the opponent —
+   before any football is shown. Borrowed from how Modern Football Analyst
+   opens every concept video. */
+.ms-def {
+  border-left: 3px solid var(--mc, #f5b301);
+  background: rgba(255, 255, 255, .04);
+  border-radius: 0 10px 10px 0;
+  padding: 9px 14px;
+  margin: 2px 0 10px;
+}
+.ms-term {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--mc, #f5b301);
+}
+.ms-mean { margin: 5px 0 0; font-size: 14.5px; line-height: 1.5; }
+.ms-hurts { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; opacity: .92; }
+.ms-hurts span {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 800;
+  opacity: .7;
+  margin-right: 7px;
+}
