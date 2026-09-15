@@ -1,11 +1,11 @@
 /* K1 Shooters Tactics Board — service worker: offline app shell */
-const VERSION = 'k1tb-v1.6.0';
+const VERSION = 'k1tb-v1.7.0';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/icons.js', './js/logo-data.js', './js/logo.js', './js/kits.js', './js/formations.js', './js/pitch.js', './js/state.js',
   './js/setpieces.js', './js/drills.js', './js/drills-k1.js', './js/tactics.js', './js/phases.js', './js/render.js', './js/anim.js', './js/templates.js',
   './js/board.js', './js/gif.js', './js/storage.js', './js/squad.js', './js/teams.js', './js/match.js', './js/session.js', './js/ui.js', './js/panes.js', './js/panes-teams.js', './js/competitions.js', './js/panes-comps.js', './js/panes-home.js',
-  './js/masterclass.js', './js/masterclass-content.js', './js/masterclass-clubs.js', './js/masterclass-core.js', './js/panes-masterclass.js', './js/app.js',
+  './js/curriculum.js', './js/masterclass.js', './js/masterclass-content.js', './js/masterclass-clubs.js', './js/masterclass-core.js', './js/panes-masterclass.js', './js/panes-curriculum.js', './js/app.js',
   './assets/icon.svg', './assets/icon-maskable.svg',
 ];
 

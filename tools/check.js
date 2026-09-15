@@ -11,7 +11,7 @@ const root = path.join(__dirname, '..');
 const FILES = [
   'js/icons.js', 'js/logo-data.js', 'js/logo.js', 'js/kits.js', 'js/formations.js', 'js/pitch.js',
   'js/state.js', 'js/setpieces.js', 'js/drills.js', 'js/drills-k1.js', 'js/tactics.js', 'js/phases.js',
-  'js/masterclass.js', 'js/masterclass-content.js', 'js/masterclass-clubs.js', 'js/masterclass-core.js',
+  'js/curriculum.js', 'js/masterclass.js', 'js/masterclass-content.js', 'js/masterclass-clubs.js', 'js/masterclass-core.js',
 ];
 
 const noop = () => {};
@@ -74,6 +74,12 @@ MC.forEach(m => m.slides.forEach((s, i) => {
 MC.forEach(m => (m.sessionIds || []).forEach(id => {
   if (!(K.DRILLS || []).some(d => d.id === id)) bad.push(m.id + ' sessionIds → drill:' + id);
 }));
+/* Every week of the season plan must point at a real masterclass and real drills. */
+(K.Curriculum ? K.Curriculum.weeks() : []).forEach(w => {
+  if (w.mc && !MC.some(m => m.id === w.mc)) bad.push('curriculum week ' + w.n + ' -> masterclass:' + w.mc);
+  (w.drills || []).forEach(id => { if (!(K.DRILLS || []).some(d => d.id === id)) bad.push('curriculum week ' + w.n + ' -> drill:' + id); });
+});
+
 if (bad.length) { console.log('\n--- DANGLING REFERENCES (' + bad.length + ') ---'); bad.forEach(b => console.log('  ' + b)); }
 else console.log('\n  all board and session references resolve');
 

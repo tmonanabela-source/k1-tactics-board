@@ -11,6 +11,8 @@
   const MC = () => K1.Masterclass;
 
   let current = null, slideIx = 0, showNotes = false;
+  let classTab = 'classes';  // classes | season
+  P.setClassTab = t => { classTab = t; };
 
   /* Definition first, footage second. Every concept module opens with one of these:
    * the term, what it means in one sentence, and what problem it makes for the opponent.
@@ -37,14 +39,30 @@
   P.openMasterclass = (id, ix) => { current = id; slideIx = ix || 0; };
 
   /* ================================================================= LIST */
+  function tabsHTML() {
+    return '<div class="seg cls-tabs">' +
+      '<button class="seg-btn' + (classTab === 'classes' ? ' on' : '') + '" data-ctab="classes">Masterclasses</button>' +
+      '<button class="seg-btn' + (classTab === 'season' ? ' on' : '') + '" data-ctab="season">Season plan</button></div>';
+  }
+  function bindTabs(root) {
+    $$('[data-ctab]', root).forEach(b => { b.onclick = () => { classTab = b.dataset.ctab; current = null; P.masterclass(root); }; });
+  }
+
   P.masterclass = function (root) {
     if (current && !MC().get(current)) current = null;
+    if (classTab === 'season' && !current) {
+      root.innerHTML = tabsHTML() + '<div id="curHost"></div>';
+      bindTabs(root);
+      P.curriculum($('#curHost', root));   // renders and binds inside its own host
+      return;
+    }
     if (current) return renderOne(root, MC().get(current));
-    let s = section('Tactical masterclasses', '<p class="muted small">Sessions you can present to the team: the idea, the shape on the pitch, the coaching points and the drills that train it. Open one, press Present, and step through it with the arrow keys or on the phone with a swipe of the buttons.</p>');
+    let s = tabsHTML() + section('Tactical masterclasses', '<p class="muted small">Sessions you can present to the team: the idea, the shape on the pitch, the coaching points and the drills that train it. Open one, press Present, and step through it with the arrow keys or on the phone with a swipe of the buttons.</p>');
     MC().groups().forEach(g => {
       s += '<h5 class="group-title">' + esc(g.name) + '</h5><div class="mc-grid">' + g.items.map(m => '<button class="mc-card" data-mc="' + m.id + '"' + (m.accent ? ' style="--mc:' + m.accent + '"' : '') + '><span class="mc-bar"></span><span class="mc-body"><b>' + esc(m.title) + '</b><small>' + esc(m.subtitle || '') + '</small><span class="tags">' + (m.coach ? '<span class="tag">' + esc(m.coach) + '</span>' : '') + '<span class="tag">' + MC().slideCount(m) + ' slides</span>' + (m.level ? '<span class="tag">' + esc(m.level) + '</span>' : '') + (m.duration ? '<span class="tag">' + esc(m.duration) + '</span>' : '') + '</span></span>' + icon('chevronRight', { size: 18 }) + '</button>').join('') + '</div>';
     });
     root.innerHTML = s;
+    bindTabs(root);
     $$('[data-mc]', root).forEach(b => { b.onclick = () => { current = b.dataset.mc; slideIx = 0; P.masterclass(root); }; });
   };
 

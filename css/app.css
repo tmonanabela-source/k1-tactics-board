@@ -834,3 +834,86 @@ body.presenting .board-wrap { background: #06090c; }
   opacity: .7;
   margin-right: 7px;
 }
+
+/* ---------- The season plan ---------------------------------------------
+   Forty weeks in four terms. One idea a week, with a different version for
+   the little ones and the big ones. */
+.cls-tabs { margin-bottom: 14px; }
+
+.cur-top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  padding: 12px 14px; margin-bottom: 12px;
+  background: var(--panel-2, rgba(255,255,255,.03));
+  border: 1px solid var(--line, rgba(255,255,255,.08));
+  border-radius: 12px;
+}
+.cur-prog { flex: 1 1 220px; min-width: 200px; }
+.cur-prog span { display: block; font-size: 12px; opacity: .75; margin-top: 6px; }
+.cur-bar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; }
+.cur-bar i { display: block; height: 100%; background: #f5b301; border-radius: 4px; transition: width .3s ease; }
+
+.cur-bands { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.cur-bands .cur-chip small { opacity: .6; margin-left: 5px; font-size: 10.5px; }
+
+.cur-term { margin-bottom: 10px; border: 1px solid var(--line, rgba(255,255,255,.08)); border-radius: 12px; overflow: hidden; }
+.cur-term-head {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 13px 14px; background: none; border: 0; cursor: pointer;
+  color: inherit; text-align: left; font: inherit;
+}
+.cur-term-head:hover { background: rgba(255,255,255,.035); }
+.cur-term-n {
+  flex: none; width: 27px; height: 27px; border-radius: 50%;
+  background: #f5b301; color: #131c21; font-weight: 800; font-size: 13px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.cur-term-b { flex: 1; min-width: 0; }
+.cur-term-b b { display: block; font-size: 15px; }
+.cur-term-b small { display: block; opacity: .65; font-size: 11.5px; margin-top: 2px; }
+.cur-term.open .cur-term-head { border-bottom: 1px solid var(--line, rgba(255,255,255,.08)); }
+
+.cur-weeks { padding: 10px; display: grid; gap: 10px; }
+.cur-week {
+  border: 1px solid var(--line, rgba(255,255,255,.07));
+  border-radius: 10px; padding: 11px 13px;
+  background: rgba(255,255,255,.02);
+  transition: border-color .2s ease, background .2s ease;
+}
+.cur-week.done { opacity: .62; border-color: rgba(74,222,128,.35); }
+.cur-week.flash { border-color: #f5b301; background: rgba(245,179,1,.08); }
+.cur-week-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.cur-week-head b { font-size: 14.5px; }
+.cur-w-n { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; opacity: .55; font-weight: 700; }
+.cur-tick {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid var(--line, rgba(255,255,255,.2)); background: none; color: inherit;
+  display: inline-flex; align-items: center; justify-content: center; opacity: .55;
+}
+.cur-tick:hover { opacity: 1; border-color: #f5b301; }
+.cur-week.done .cur-tick { background: #4ade80; border-color: #4ade80; color: #0b1116; opacity: 1; }
+
+.cur-band-rows { display: grid; gap: 5px; margin-bottom: 8px; }
+.cur-band-row { display: flex; gap: 11px; align-items: baseline; font-size: 13px; line-height: 1.45; }
+.cur-band-name { flex: none; width: 108px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; opacity: .8; }
+.cur-band-name small { display: block; font-weight: 500; opacity: .6; letter-spacing: 0; text-transform: none; }
+.cur-band-txt { flex: 1; opacity: .9; }
+.cur-note { font-size: 12.5px; font-style: italic; opacity: .68; margin: 6px 0 8px; }
+.cur-acts { gap: 7px; }
+.cur-drills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cur-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: none; color: var(--muted);
+  font-size: 12px; font-weight: 600; font-family: inherit;
+  cursor: pointer; white-space: nowrap;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.cur-chip:hover { background: var(--surface2); color: var(--text); }
+.cur-chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.cur-chip.sm { font-size: 11px; padding: 3px 10px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 640px) {
+  .cur-band-row { display: block; }
+  .cur-band-name { width: auto; margin-bottom: 1px; }
+  .cur-top { gap: 10px; }
+}
