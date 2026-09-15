@@ -9,6 +9,34 @@
   const B = (name, minutes, type, desc, drillId) => ({ id: K1.uid('bl'), name, minutes, type, desc: desc || '', drillId: drillId || null, boardId: null });
 
   SS.TEMPLATES = [
+    /* ---- the K1 Shooters Academy week, exactly as the development model sets it out ---- */
+    { name: '🌀 La Masia Mondays — build-up & control', theme: 'Play from deep. Think ahead. Control the tempo. · 4-2 base', blocks: [
+      B('Rondo 5v2 · scan before you receive', 15, 'Possession', 'Head turns twice before the ball arrives. Two touch, then one.', 'k1_rondo_5v2'),
+      B('4 + 2 vs 3 · beat the press together', 20, 'Possession', 'Full-backs and anchors work as one unit to play out.', 'k1_press_4plus2v3'),
+      B('Pattern play · overlap, underlap, pivot switch', 20, 'Technical', 'The three answers our bridge players own.', 'k1_pattern_fb_pivot'),
+      B('Build-up game 6v5 · wide triggers', 25, 'Game', 'Bait one side, switch, carry it over the line.', 'k1_buildup_6v5'),
+      B('Cool down & tactical brief', 10, 'Cool-down', 'Two questions: when did we go, and when should we have waited?'),
+    ] },
+    { name: '🎯 Arsenal Tuesdays — flair & final third', theme: 'Attack with courage. Express with structure. · futsal 3-1 / 2-2', blocks: [
+      B('Ball mastery warm-up', 10, 'Warm-up', 'Every boy on a ball. Moves at speed, both feet.'),
+      B('1v1 to 2v1 waves · go at him', 20, 'Finishing', 'Take people on. Losing it trying is not a mistake.', 'k1_waves_1v1_2v1'),
+      B('Futsal structure · 3-1 and 2-2', 25, 'Technical', 'Small pitch, many touches, real rotations.', 'k1_futsal_31_22'),
+      B('Transition games + full-back involvement', 25, 'Game', 'Everyone attacks, everyone recovers.', 'transition_4v4_2'),
+      B('Cool down & goal review', 10, 'Cool-down', 'Watch the goals back. Name the pass before the pass.'),
+    ] },
+    { name: '🔥 Workshop Fridays — tactical identity & roles', theme: 'Know your role. Play with purpose.', blocks: [
+      B('Chalkboard · roles in our shapes', 20, 'Tactical', 'Board session: 4-2-3-1, 4-3-3 and the 4-2-2-2 variation. Every player says his own job out loud.'),
+      B('Split role · full-back overlap vs inverted', 20, 'Tactical', 'One picture, two answers.', 'k1_role_fullback'),
+      B('Split role · anchor turn, switch, protect', 20, 'Tactical', 'Scan, touch away from pressure, switch.', 'k1_role_pivot'),
+      B('Game scenarios 6v6 or 8v8', 20, 'Game', 'Freeze, ask, restart. Scenario first, result second.'),
+      B('Player journals · role reflections', 10, 'Cool-down', 'Each player writes one thing he owned and one he will fix.'),
+    ] },
+    { name: '🧠 Tactical Saturdays — system integration', theme: 'Think like a first-team player. · U17+ with K1 SHOOTERS FC', blocks: [
+      B('K1 FC warm-up & patterns', 10, 'Warm-up', 'First-team patterns at match tempo.'),
+      B('Zone build-up · GK, CB, anchor, full-back', 20, 'Tactical', 'Pass through every zone, never dribble through a line.', 'k1_zone_buildup'),
+      B('System match play 11v11 or 9v9', 40, 'Game', 'Full system. Coach freezes only on the model, not on mistakes.'),
+      B('Team talks & player feedback', 15, 'Cool-down', 'Players speak first. Coach closes.'),
+    ] },
     { name: 'Pressing session', theme: 'Press as a unit · triggers · traps', blocks: [
       B('Dynamic warm-up', 12, 'Warm-up', 'Ladder, hurdles, ball weave, passing lane.', 'warmup_dynamic'),
       B('Rondo 4v2 — pressing focus', 12, 'Possession', 'Two defenders press together, cut the lane.', 'rondo_4v2'),

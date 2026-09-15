@@ -50,6 +50,25 @@
       ],
     },
     {
+      id: 'dezerbi_4222', club: 'De Zerbi', name: 'De Zerbi · 4-2-2-2 → 2-4-4 build trap', kits: ['sky', 'red'],
+      desc: 'The 4-2-2-2 becomes a 2-4-4 to build. Two centre-backs stand on the ball and invite the press; the full-backs step up level with the double pivot; four attackers pin the back line. Break the first line and the pitch is wide open.',
+      frames: [
+        { home: '4222dz', away: '4141mid', ball: [10, 34], caption: 'Base 4-2-2-2 · the square in midfield, width from the full-backs' },
+        { home: '244dz', away: '433press', ball: [23, 40], caption: 'Build trap: 2-4-4 · centre-backs invite the press, four attackers pin the line' },
+        { home: '325dz', away: '442low', ball: [66, 62], caption: 'Line broken: 3-2-5 · five on the last line, overload the far half-space' },
+        { home: '4222press', away: '4141mid', ball: [40, 34], caption: 'Ball lost: counter-press instantly, strikers on the centre-backs' },
+      ],
+    },
+    {
+      id: 'fabregas_como', club: 'Fàbregas', name: 'Fàbregas · Como 4-2-2-2 → 2-3-5', kits: ['blue', 'white'],
+      desc: 'Same square, a freer accent. Full-backs step inside, the 6 drops between the centre-backs and the playmaker roams off the front line to find the ball wherever it is.',
+      frames: [
+        { home: '4222como', away: '442', ball: [12, 34], caption: 'Base 4-2-2-2 · one ten free to roam, one holding the far half-space' },
+        { home: '235como', away: '442low', ball: [42, 46], caption: 'In possession: 2-3-5 · full-backs inside, five across the last line' },
+        { home: '4222block', away: '235', ball: [58, 34], caption: 'Out of possession: the tens drop, two banks of four' },
+      ],
+    },
+    {
       id: 'youth_231_press', club: 'K1 Shooters', name: 'Youth 7v7 · 2-3-1 press & build', kits: ['k1', 'blue'], pitch: 'seven',
       desc: 'Simple 7-a-side shape. Without the ball the striker and wide players press together; with the ball the wide players get high and the midfielder supports underneath.',
       frames: [

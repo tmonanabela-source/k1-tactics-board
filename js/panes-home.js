@@ -26,6 +26,7 @@
     const next = fixtures.slice(0, 5);
     const comps = C.list().filter(c => c.status !== 'done').slice(0, 3);
     const sessions = SS.list().slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 3);
+    const classes = K1.Masterclass ? K1.Masterclass.list().slice(0, 3) : [];
     const players = team ? T.players(team.id) : [];
     const season = M.seasonStats(team ? team.id : null).record;
     const rates = team ? SS.attendanceRates(team.id).filter(r => r.marked) : [];
@@ -43,6 +44,7 @@
       '<button class="qa" data-go="match">' + icon('whistle', { size: 22 }) + '<span>Match day</span></button>' +
       '<button class="qa" data-go="comps">' + icon('trophy', { size: 22 }) + '<span>Tournaments</span></button>' +
       '<button class="qa" data-go="sessions">' + icon('calendar', { size: 22 }) + '<span>Plan a session</span></button>' +
+      '<button class="qa" data-go="masterclass">' + icon('sparkles', { size: 22 }) + '<span>Masterclass</span></button>' +
       '<button class="qa" data-go="board" data-playbook="1">' + icon('book', { size: 22 }) + '<span>Playbook</span></button>' +
       '</div></div>';
     // live match
@@ -64,6 +66,7 @@
       : '<p class="muted small">Boards you save appear here. Open the board, draw, press Save.</p>') + '<div class="row wrap"><button class="btn btn-sm" data-go="board">' + icon('grid', { size: 15 }) + '<span>Open the board</span></button><button class="btn btn-sm btn-ghost" data-go="library">' + icon('folder', { size: 15 }) + '<span>Library</span></button></div></div>';
     // competitions + sessions
     s += '<div class="hcard comps"><h4>Competitions</h4>' + (comps.length ? '<div class="list compact">' + comps.map(c => '<button class="list-row" data-comp="' + c.id + '"><span class="lr-main"><b>' + esc(c.name) + '</b><span class="muted small">' + c.teams.length + ' teams · ' + c.matches.filter(x => x.played && !x.bye).length + '/' + c.matches.filter(x => !x.bye).length + ' played' + (c.date ? ' · ' + esc(c.date) : '') + '</span></span>' + icon('chevronRight', { size: 16 }) + '</button>').join('') + '</div>' : '<p class="muted small">Nothing running. Create a league or a one-day tournament in Comps.</p>') + '</div>';
+    if (classes.length) s += '<div class="hcard classes"><h4>Tactical masterclasses</h4><div class="list compact">' + classes.map(c => '<button class="list-row" data-class="' + c.id + '"><span class="lr-main"><b>' + esc(c.title) + '</b><span class="muted small">' + esc([c.subtitle, c.coach, c.duration].filter(Boolean).join(' · ')) + '</span></span>' + icon('chevronRight', { size: 16 }) + '</button>').join('') + '</div><div class="row wrap"><button class="btn btn-sm" data-go="masterclass">' + icon('sparkles', { size: 15 }) + '<span>All masterclasses</span></button></div></div>';
     s += '<div class="hcard sessions"><h4>Training</h4>' + (sessions.length ? '<div class="list compact">' + sessions.map(x => { const tm = x.teamId ? T.get(x.teamId) : null; const sum = SS.attendanceSummary(x); return '<button class="list-row" data-session="' + x.id + '"><span class="lr-main"><b>' + esc(x.title) + '</b><span class="muted small">' + (tm ? esc(tm.name) + ' · ' : '') + esc(x.date) + ' · ' + SS.total(x) + ' min' + (sum.squad && (sum.present || sum.late || sum.absent || sum.injured) ? ' · ' + sum.there + '/' + sum.squad + ' there' : '') + '</span></span>' + icon('chevronRight', { size: 16 }) + '</button>'; }).join('') + '</div>' : '<p class="muted small">Plan sessions with drills, timings and attendance.</p>') + '<div class="row wrap"><button class="btn btn-sm" data-go="sessions">' + icon('calendar', { size: 15 }) + '<span>Sessions</span></button></div></div>';
     s += '</div>';
     root.innerHTML = s;
@@ -77,6 +80,7 @@
     }; });
     $$('[data-comp]', root).forEach(b => { b.onclick = () => { P.openCompetition(b.dataset.comp); UI().goSection('comps'); }; });
     $$('[data-session]', root).forEach(b => { b.onclick = () => { P.openSession(b.dataset.session); UI().goSection('sessions'); }; });
+    $$('[data-class]', root).forEach(b => { b.onclick = () => { P.openMasterclass(b.dataset.class); UI().goSection('masterclass'); }; });
     $$('[data-board]', root).forEach(b => { b.onclick = () => { const e = K1.Store.getBoard(b.dataset.board); if (e) P.openDoc(K1.clone(e.doc), e.title).then(ok => { if (ok) K1.S.dirty = false; }); }; });
     const lu = $('[data-lineup]', root); if (lu) lu.onclick = () => { const fid = (team.formation) || (K1.formationsFor(T.playersFor(team.pitch))[0] || {}).id; if (K1.dims().players !== T.playersFor(team.pitch)) { K1.mutate(() => { K1.S.doc.pitch.type = team.pitch; }, 'pitch'); K1.Render.invalidatePitch(); K1.Render.layout(true); } K1.Squad.placeLineup(fid, { teamId: team.id }); UI().goSection('board'); UI().toast(esc(team.name) + ' line-up placed', 'ok'); };
   };

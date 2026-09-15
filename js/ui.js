@@ -72,11 +72,12 @@
     { id: 'board', icon: 'grid', label: 'Board', title: 'Tactics board' },
     { id: 'teams', icon: 'users', label: 'Teams', title: 'Teams & players' },
     { id: 'comps', icon: 'trophy', label: 'Comps', title: 'Competitions' },
+    { id: 'masterclass', icon: 'sparkles', label: 'Class', title: 'Tactical masterclasses' },
     { id: 'match', icon: 'whistle', label: 'Match', title: 'Match day' },
     { id: 'sessions', icon: 'calendar', label: 'Sessions', title: 'Training sessions' },
     { id: 'library', icon: 'folder', label: 'Library', title: 'Board library' },
   ];
-  const WS_PANE = { home: 'home', teams: 'team', comps: 'comps', match: 'match', sessions: 'sessions', library: 'library' };
+  const WS_PANE = { home: 'home', teams: 'team', comps: 'comps', masterclass: 'masterclass', match: 'match', sessions: 'sessions', library: 'library' };
   UI.SECTIONS = SECTIONS;
   UI.section = 'home';
 
@@ -105,6 +106,7 @@
     K1.on('sessions', () => refreshPaneIf(['sessions']));
     K1.on('match', () => refreshPaneIf(['match']));
     K1.on('comps', () => refreshPaneIf(['comps']));
+    K1.on('sessions', () => refreshPaneIf(['masterclass']));
     K1.on('logo', () => { buildBrand(); });
     K1.on('saved', updateTopbar);
     window.addEventListener('resize', () => { updateHUD(); });
@@ -151,7 +153,7 @@
     UI.section = id;
     document.body.dataset.section = id;
     $$('#appnav .nav-item').forEach(b => b.classList.toggle('on', b.dataset.section === id));
-    const inMore = !['home', 'board', 'teams', 'comps'].includes(id);
+    const inMore = !['home', 'board', 'teams', 'masterclass'].includes(id);
     $$('#mobilebar .mb-item').forEach(b => b.classList.toggle('on', b.dataset.mb === id || (inMore && b.dataset.mb === 'more')));
     const st = $('#sectionTitle'); if (st) { const sec = SECTIONS.find(s => s.id === id); st.textContent = id === 'board' ? '' : (sec ? sec.title : ''); }
     if (UI.isSheetOpen() && sheetPane !== 'tray') UI.closeSheet();
@@ -528,7 +530,7 @@
   UI.openPane = function (id) {
     if (id === 'team') id = 'teams';
     if (WS_PANE[id]) return UI.goSection(id);
-    if (id === 'more') { return UI.sheet('More', body => { body.innerHTML = '<div class="more-grid">' + [['match', 'whistle', 'Match day'], ['sessions', 'calendar', 'Sessions'], ['library', 'folder', 'Library'], ['settings', 'settings', 'Settings'], ['help', 'help', 'Help'], ['install', 'smartphone', 'Install app'], ['share', 'share', 'Share board'], ['import', 'upload', 'Import'], ['backup', 'download', 'Back up']].map(x => '<button class="more-item" data-more="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('') + '</div>'; $$('[data-more]', body).forEach(b => { b.onclick = () => { const m = b.dataset.more; UI.closeSheet(); if (m === 'settings') UI.showSettings(); else if (m === 'help') UI.showHelp(); else if (m === 'install') UI.installApp(); else if (m === 'share') { UI.goSection('board'); UI.shareDialog(); } else if (m === 'import') UI.importFile(); else if (m === 'backup') K1.Store.exportAll(); else UI.openPane(m); }; }); }, 'more'); }
+    if (id === 'more') { return UI.sheet('More', body => { body.innerHTML = '<div class="more-grid">' + [['comps', 'trophy', 'Competitions'], ['match', 'whistle', 'Match day'], ['sessions', 'calendar', 'Sessions'], ['library', 'folder', 'Library'], ['settings', 'settings', 'Settings'], ['help', 'help', 'Help'], ['install', 'smartphone', 'Install app'], ['share', 'share', 'Share board'], ['import', 'upload', 'Import'], ['backup', 'download', 'Back up']].map(x => '<button class="more-item" data-more="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('') + '</div>'; $$('[data-more]', body).forEach(b => { b.onclick = () => { const m = b.dataset.more; UI.closeSheet(); if (m === 'settings') UI.showSettings(); else if (m === 'help') UI.showHelp(); else if (m === 'install') UI.installApp(); else if (m === 'share') { UI.goSection('board'); UI.shareDialog(); } else if (m === 'import') UI.importFile(); else if (m === 'backup') K1.Store.exportAll(); else UI.openPane(m); }; }); }, 'more'); }
     if (UI.section !== 'board') UI.goSection('board');
     if (id === 'tray') { return UI.sheet('Add to the pitch', body => { body.innerHTML = '<div class="tray-sheet">' + trayHTML() + '</div><p class="hint">Tap an item, then tap the pitch to place it (players number themselves). Tap again to place more. Drag from here also works.</p>'; bindTray(body); }, 'tray'); }
     if (!TABS.find(t => t.id === id)) id = 'board';
@@ -539,7 +541,7 @@
   /* ============================================================= mobile bar */
   function buildMobileBar() {
     const mb = $('#mobilebar');
-    const items = [['home', 'home', 'Home'], ['board', 'grid', 'Board'], ['teams', 'users', 'Teams'], ['comps', 'trophy', 'Comps'], ['more', 'menu', 'More']];
+    const items = [['home', 'home', 'Home'], ['board', 'grid', 'Board'], ['teams', 'users', 'Teams'], ['masterclass', 'sparkles', 'Class'], ['more', 'menu', 'More']];
     mb.innerHTML = items.map(x => '<button class="mb-item" data-mb="' + x[0] + '">' + icon(x[1], { size: 22 }) + '<span>' + x[2] + '</span></button>').join('');
     $$('[data-mb]', mb).forEach(b => { b.onclick = () => UI.openPane(b.dataset.mb); });
   }

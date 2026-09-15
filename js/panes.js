@@ -102,7 +102,7 @@
   P.playbook = function (root) {
     const q = pbQuery.trim().toLowerCase();
     const match = (...fields) => !q || fields.some(f => String(f || '').toLowerCase().includes(q));
-    let s = '<div class="subtabs">' + [['formations', 'Formations'], ['tactics', 'Tactics'], ['setpieces', 'Set pieces'], ['drills', 'Drills']].map(t => '<button class="' + (pbTab === t[0] ? 'on' : '') + '" data-pb="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>';
+    let s = '<div class="subtabs">' + [['formations', 'Formations'], ['phases', 'Phases'], ['tactics', 'Tactics'], ['setpieces', 'Set pieces'], ['drills', 'Drills']].map(t => '<button class="' + (pbTab === t[0] ? 'on' : '') + '" data-pb="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>';
     s += '<div class="search"><input class="input" id="pbSearch" placeholder="Search the playbook…" value="' + esc(pbQuery) + '">' + icon('select', { size: 14 }) + '</div>';
     if (pbTab === 'formations') {
       const d = K1.dims();
@@ -110,6 +110,13 @@
       s += '<p class="muted small">' + d.players + '-a-side shapes for the current pitch. Apply to either team — the away team is mirrored automatically.</p>';
       s += '<label class="check small"><input type="checkbox" id="pbAllFrames"><span>Apply to every frame</span></label>';
       s += '<div class="cards">' + forms.map(f => '<div class="card"><div class="card-body"><b>' + esc(f.name) + '</b>' + (f.tags ? '<div class="tags">' + f.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>' : '') + '<p>' + esc(f.desc || '') + '</p></div><div class="card-actions"><button class="btn btn-sm btn-primary" data-form="' + f.id + '" data-team="home">' + esc(S.doc.teams.home.name.split(' ')[0]) + '</button><button class="btn btn-sm" data-form="' + f.id + '" data-team="away">' + esc(S.doc.teams.away.name.split(' ')[0]) + '</button></div></div>').join('') + '</div>';
+    } else if (pbTab === 'phases') {
+      s += '<p class="muted small">The game model, phase by phase, with the group shape and the individual runs animated. Open one and press Play to show the team how it moves.</p>';
+      (K1.phaseGroups ? K1.phaseGroups() : []).forEach(g => {
+        const items = g.items.filter(ph => match(ph.name, ph.group, ph.desc));
+        if (!items.length) return;
+        s += '<h5 class="group-title">' + esc(g.name) + '</h5><div class="cards">' + items.map(ph => '<div class="card"><div class="card-body"><b>' + esc(ph.name) + '</b><p>' + esc(ph.desc) + '</p><div class="tags"><span class="tag">' + ph.frames.length + ' frame' + (ph.frames.length > 1 ? 's' : '') + '</span>' + (ph.coaching ? '<span class="tag">' + ph.coaching.length + ' coaching points</span>' : '') + '</div></div><div class="card-actions"><button class="btn btn-sm btn-primary" data-phase="' + ph.id + '">' + icon('play', { size: 14 }) + '<span>Open</span></button></div></div>').join('') + '</div>';
+      });
     } else if (pbTab === 'tactics') {
       const ms = K1.MORPHS.filter(m => match(m.name, m.club, m.desc));
       s += '<p class="muted small">How the best teams change shape with and without the ball. Each opens as a multi-frame board — press Play to watch the morph.</p>';
@@ -135,6 +142,7 @@
     search.oninput = () => { pbQuery = search.value; const pos = search.selectionStart; P.playbook(root); const s2 = $('#pbSearch', root); s2.focus(); try { s2.setSelectionRange(pos, pos); } catch (e) { /* ignore */ } };
     $$('[data-form]', root).forEach(b => { b.onclick = () => { K1.Templates.applyFormation(b.dataset.team, b.dataset.form, { allFrames: $('#pbAllFrames', root) && $('#pbAllFrames', root).checked }); UI().toast((K1.formationById(b.dataset.form) || {}).name + ' applied', 'ok'); if (K1.isMobile()) UI().closeSheet(); }; });
     $$('[data-morph]', root).forEach(b => { b.onclick = () => { const m = K1.MORPHS.find(x => x.id === b.dataset.morph); openDoc(K1.Templates.docFromMorph(m), m.name); }; });
+    $$('[data-phase]', root).forEach(b => { b.onclick = () => { const ph = K1.phaseById(b.dataset.phase); const doc = K1.Templates.docFromSetPiece(ph); doc.tags = ['phase', ph.group]; if (ph.coaching) doc.notes = ph.desc + '\n\nCoaching points:\n• ' + ph.coaching.join('\n• '); openDoc(doc, ph.name); }; });
     $$('[data-sp]', root).forEach(b => { b.onclick = () => { const sp = K1.SETPIECES.find(x => x.id === b.dataset.sp); openDoc(K1.Templates.docFromSetPiece(sp, { pitch: b.dataset.pitch }), sp.name); }; });
     $$('[data-drill]', root).forEach(b => { b.onclick = () => { const dr = K1.DRILLS.find(x => x.id === b.dataset.drill); openDoc(K1.Templates.docFromDrill(dr), dr.name); }; });
   };

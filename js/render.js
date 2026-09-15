@@ -716,23 +716,30 @@
     return s;
   };
 
-  /** Small preview SVG of any frame (used in the frame strip + board library). */
-  R.thumbSVG = function (doc, frame, w, h) {
+  /** Small preview SVG of any frame (used in the frame strip, board library and masterclass slides). */
+  R.thumbSVG = function (doc, frame, w, h, opts) {
+    opts = opts || {};
     const d = K1.pitchDims(doc.pitch);
     const t = K1.THEMES[doc.pitch.theme] || K1.THEMES.stripes;
     const p = K1.projection(d, 'landscape');
     const kits = { home: K1.kitById(doc.teams.home.kit), away: K1.kitById(doc.teams.away.kit) };
     let s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="' + f(p.baseView.x + 2) + ' ' + f(p.baseView.y + 2) + ' ' + f(p.baseView.w - 4) + ' ' + f(p.baseView.h - 4) + '" preserveAspectRatio="xMidYMid slice">';
     s += '<rect x="-500" y="-500" width="1000" height="1000" fill="' + t.outer + '"/>';
-    s += K1.markingsSVG(d, t, 'none');
-    const r = Math.max(1.6, d.L / 48);
+    s += K1.markingsSVG(d, t, opts.overlay ? doc.pitch.overlay : 'none');
+    const r = Math.max(1.6, d.L / 48) * (opts.scale || 1);
     (frame.objects || []).forEach(o => {
       if (o.type === 'player') {
         const kit = kits[o.team];
         const fill = o.team === 'ref' ? '#111827' : o.team === 'neutral' ? (o.color || '#facc15') : (o.color || (o.gk ? kit.gk : kit.primary));
         s += '<circle cx="' + f(o.x) + '" cy="' + f(o.y) + '" r="' + f(r) + '" fill="' + fill + '" stroke="rgba(255,255,255,.7)" stroke-width=".3"/>';
       } else if (o.type === 'ball') s += '<circle cx="' + f(o.x) + '" cy="' + f(o.y) + '" r="' + f(r * .6) + '" fill="#fff" stroke="#111" stroke-width=".25"/>';
-      else if (o.type === 'path' && o.points && o.points.length > 1) s += '<path d="' + polyPath(o.points) + '" fill="none" stroke="' + (o.color || '#fff') + '" stroke-width=".6" opacity=".85"/>';
+      else if (o.type === 'path' && o.points && o.points.length > 1) {
+        const pts = o.geo === 'curve' && o.ctrl ? sampleQuad(o.points[0], o.ctrl, o.points[o.points.length - 1], 16) : o.points;
+        s += '<path d="' + polyPath(pts) + '" fill="none" stroke="' + (o.color || '#fff') + '" stroke-width="' + f(.55 * (opts.scale || 1)) + '" opacity=".9"' + (o.dash ? ' stroke-dasharray="1.4 1"' : '') + ' stroke-linecap="round"/>';
+      } else if (o.type === 'text' && opts.labels !== false && o.text) {
+        const fs = Math.max(1.6, (o.size || 2.2) * .9 * (opts.scale || 1));
+        s += '<text x="' + f(o.x) + '" y="' + f(o.y) + '" dy=".36em" text-anchor="middle" font-size="' + f(fs) + '" font-weight="700" fill="' + (o.color || '#fff') + '" style="font-family:Inter,Arial,sans-serif;paint-order:stroke" stroke="rgba(11,17,22,.75)" stroke-width="' + f(fs * .28) + '">' + esc(o.text.split('\n')[0]) + '</text>';
+      }
       else if (o.type === 'equip') s += '<circle cx="' + f(o.x) + '" cy="' + f(o.y) + '" r="' + f(r * .45) + '" fill="' + (o.color || '#f97316') + '"/>';
       else if (o.type === 'shape') s += '<rect x="' + f(o.x - o.w / 2) + '" y="' + f(o.y - o.h / 2) + '" width="' + f(o.w) + '" height="' + f(o.h) + '" fill="' + o.color + '" fill-opacity=".2" stroke="' + o.color + '" stroke-width=".3"/>';
     });
