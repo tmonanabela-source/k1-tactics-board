@@ -1,5 +1,5 @@
 /* K1 Shooters Tactics Board — service worker: offline app shell */
-const VERSION = 'k1tb-v1.8.0';
+const VERSION = 'k1tb-v1.9.0';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/icons.js', './js/logo-data.js', './js/logo.js', './js/kits.js', './js/formations.js', './js/pitch.js', './js/state.js',

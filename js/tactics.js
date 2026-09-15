@@ -51,12 +51,12 @@
       ],
     },
     {
-      id: 'pirates_4231_343', club: 'Orlando Pirates', name: 'Orlando Pirates · 4-2-3-1 → 3-4-3', kits: ['pirates', 'yellow'],
-      desc: 'A 4-2-3-1 base with a double pivot. In possession one full-back pushes very high and the other tucks in beside the centre-backs, creating a 3-4-3 with wing-backs providing the width.',
+      id: 'pirates_433_325', club: 'Orlando Pirates', name: 'Orlando Pirates · Ouaddou’s 4-3-3', kits: ['pirates', 'yellow'],
+      desc: 'Abdeslam Ouaddou took over in June 2025 and set Pirates up in a 4-3-3. In his first season they won the league for the first time since 2011-12, ending Mamelodi Sundowns’ eight-year run, and he was named coach of the season. In possession a full-back steps inside and five occupy the last line; the moment it is lost, they press. His own complaint about his players is the interesting part for us: not that they lack skill, but that the rhythm drops when they stop being serious.',
       frames: [
-        { home: '4231', away: '442', ball: [30, 34], caption: 'Base 4-2-3-1' },
-        { home: '343', away: '442low', ball: [55, 30], caption: 'In possession: 3-4-3 with wing-backs high' },
-        { home: '4231', away: '442', ball: [45, 40], caption: 'Recover into the double pivot when the ball is lost' },
+        { home: '433', away: '442', ball: [16, 34], caption: 'Base 4-3-3 · the shape Ouaddou set up in from his first pre-season match' },
+        { home: '325', away: '442low', ball: [50, 24], caption: 'In possession: full-back steps in, five hold the last line' },
+        { home: '433press', away: '442', ball: [52, 40], caption: 'Ball lost: press it back — “the rhythm dropped when we stopped being serious”' },
       ],
     },
     {
